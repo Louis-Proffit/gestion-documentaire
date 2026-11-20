@@ -2,29 +2,47 @@
 
 Application web **monopage** : un seul fichier `index.html`, **aucun accès réseau**.
 Ouvrez-le simplement dans un navigateur (double-clic sur le fichier) : tout fonctionne
-en local, et les seules entrées/sorties sont des **fichiers sur le disque**
-(sélecteurs d'ouverture, enregistrements proposés via le sélecteur de fichiers du
-navigateur, ou téléchargement selon le navigateur).
+en local, et les seules entrées/sorties sont des **fichiers sur le disque**.
 
-> La même documentation est embarquée dans l'application : onglet **Aide →
-> Documentation (markdown)** (ou onglet **Fichier → Exporter la documentation**) pour
-> l'exporter en `.md`.
+> La même documentation est embarquée dans l'application : page **Paramètres →
+> « Exporter la documentation (.md)… »**.
 
-## Interface (façon suite Office)
+## Interface
 
-- **Barre de titre** avec icône de l'application et zone de recherche
-  « Dites-nous ce que vous voulez faire » : tapez quelques mots pour lancer directement
-  n'importe quelle commande du ruban.
-- **Ruban** à onglets : `Fichier` (vue backstage : informations, enregistrer / ouvrir le
-  registre Excel, exporter la documentation), `Accueil`, `Trames`, `Modèles`, `Documents`,
-  `Registre`, `Aide`. Chaque onglet regroupe ses commandes par **groupes**, avec des
-  **menus déroulants** (▾) pour les variantes (ex. Ouvrir → registre Excel ou fichiers de
-  trames).
-- Les **tableaux** se sélectionnent au clic (ligne bleue) : les commandes du ruban agissent
-  sur la sélection et sont désactivées tant qu'aucune ligne n'est sélectionnée.
-  **Double-clic** sur une ligne = action principale (générer un document, retélécharger).
-- **Barre d'état** en bas : compteurs (trames / modèles / documents), champ **préfixe**
-  des documents et prochain code unique.
+- **Page principale « Nouveau document »** (au centre de l'écran) : une **grille de
+  cartes** présentant les **modèles** et les **trames**. Cliquez sur une carte pour
+  générer un document (depuis le modèle, ou en complétant les balises restantes de la
+  trame).
+- **Bandeau** sous le menu du haut : les **documents générés** (code + titre) ;
+  clic = voir dans la page Documents, double-clic = retélécharger le fichier.
+- **Pages secondaires** (menu du haut) :
+  - `Trames` : import des fichiers de trames, liste, mise à jour rétro-compatible,
+    création de modèles, génération ;
+  - `Modèles` : création / modification / suppression, génération ;
+  - `Documents` : liste complète des documents générés (code unique, nom
+    `prefixe-code-titre.ext`, chrono), retéléchargement ;
+  - `Registre` : consultation du tableau Excel complet ;
+  - `Paramètres` : chemins du dossier des trames et du registre Excel, export/import
+    manuels, documentation.
+- **Barre d'état** en bas : compteurs, préfixe des documents, prochain code et chrono.
+
+## Persistance automatique (dossier des trames + registre Excel)
+
+Pour retrouver trames, modèles et documents **dès l'ouverture de l'application** :
+
+- Dans **Paramètres**, renseignez le **chemin réseau du dossier des trames** et le
+  **chemin réseau du registre Excel** (ex. `\\serveur\partage\trames`), puis associez
+  les emplacements réels avec « Parcourir… » (API File System Access : Chrome/Edge ;
+  l'accès est redemandé à chaque ouverture). Les emplacements choisis sont conservés
+  localement (IndexedDB).
+- **Dossier des trames** : chaque trame importée ou mise à jour y est copiée ; à
+  l'ouverture, les trames du dossier sont rechargées automatiquement.
+- **Registre Excel** : à chaque modification (trame, modèle, document, paramètre), le
+  registre `.xlsx` est réenregistré automatiquement dans ce fichier ; à l'ouverture, il
+  est rechargé (trames en base64, modèles, documents, préfixe, compteurs de codes et
+  de chrono, chemins).
+- Sans configuration (ou navigateur incompatible), l'export/import manuel du registre
+  reste disponible (Paramètres / page Registre).
 
 ## Concepts
 
@@ -32,13 +50,11 @@ navigateur, ou téléchargement selon le navigateur).
   des **balises** de la forme `[Nom de la balise]` dans son texte. À l'import,
   l'application lit le fichier et **détecte automatiquement les balises** (même si
   Word les a découpées en plusieurs morceaux internes).
-- **Mise à jour d'une trame** : on peut remplacer une trame par une nouvelle version du
-  fichier. La mise à jour n'est acceptée que si elle est **rétro-compatible**, c'est-à-dire
-  si la nouvelle version contient **au minimum les mêmes balises** que l'ancienne
-  (des balises supplémentaires sont autorisées). Sinon, la mise à jour est refusée et
-  les balises manquantes sont listées. Les modèles existants restent donc valides.
+- **Mise à jour d'une trame** : la nouvelle version doit être **rétro-compatible**
+  (au minimum les mêmes balises) ; sinon elle est refusée et les balises manquantes
+  sont listées. Les modèles existants restent valides.
 - **Modèle** : trame dont **tout ou partie des balises** ont été remplacées par une valeur
-  fixe. Les balises laissées vides dans le modèle seront demandées au moment de la génération.
+  fixe. Les balises laissées vides seront demandées à la génération.
 - **Document généré** : obtenu à partir d'un modèle (valeurs pré-remplies) ou directement
   d'une trame, en complétant les balises restantes. L'application propose alors
   **d'enregistrer le document** à l'emplacement de votre choix.
@@ -75,7 +91,7 @@ remplies avec cette valeur. Le numéro chrono utilisé figure dans la liste des 
   séquentiel persistant, ex. `2026-0007`).
 - Le fichier généré est nommé **`prefixe-code-titre.ext`**, par ex.
   `GD-2026-0007-Contrat ACME.docx` :
-  - `prefixe` est un **paramètre de l'application** (champ en haut à droite, `GD` par défaut) ;
+  - `prefixe` est un **paramètre de l'application** (barre d'état, en bas à droite, `GD` par défaut) ;
   - `code` est le code unique ci-dessus ;
   - `titre` est le **titre du document**, qui joue le rôle d'une balise : s'il existe une
     balise `[TITRE]` dans la trame, elle est remplie avec cette valeur, et dans tous les cas
@@ -84,36 +100,26 @@ remplies avec cette valeur. Le numéro chrono utilisé figure dans la liste des 
 
 ## Registre Excel
 
-L'application conserve **en mémoire** :
-
-- les **fichiers de trames** eux-mêmes, et
-- la **liste des trames, des modèles et des documents générés**,
-
-le tout sous la forme d'un **tableau Excel** (`.xlsx`) que vous pouvez :
-
-- **consulter dans l'application** (onglet « Registre Excel ») ;
-- **exporter** (bouton « Exporter le registre Excel ») pour le conserver sur le disque ;
-- **réimporter** (bouton « Importer un registre Excel ») pour restaurer toute la session
-  (trames, modèles, documents, préfixe, compteur de codes).
+L'application conserve **en mémoire** les **fichiers de trames** et la **liste des trames,
+des modèles et des documents générés**, sous la forme d'un **tableau Excel** (`.xlsx`) :
+consultable dans la page `Registre`, enregistré automatiquement dans le fichier configuré
+(voir Paramètres), et exportable / réimportable manuellement.
 
 Le classeur contient 5 feuilles : `Paramètres`, `Trames`, `Modèles`, `Documents`,
 `Fichiers` (contenu des trames en base64).
 
 ## Utilisation pas à pas
 
-1. Renseignez le **préfixe** des documents dans la barre d'état (en bas à droite).
-2. Onglet **Trames** → sélectionnez un ou plusieurs fichiers `.docx`/`.xlsx`/`.pptx`
-   contenant des balises `[..]` → « Importer ces trames ». Les balises détectées
-   apparaissent dans le tableau.
-3. Sur une trame : « Créer un modèle » pour fixer tout ou partie des balises,
-   ou « Mettre à jour » pour charger une version rétro-compatible du fichier.
-4. Onglet **Modèles** (ou directement depuis une trame) → « Générer un document » :
-   saisissez le **titre**, complétez les **balises restantes**, puis validez.
-5. Choisissez où **enregistrer le document généré** (nommé `prefixe-code-titre.ext`).
-6. Onglet **Documents générés** : retrouvez la liste avec les codes uniques et
-   re-téléchargez un document si besoin.
-7. Onglet **Registre Excel** : consultez le tableau ; bouton « Exporter le registre
-   Excel » pour le sauvegarder sur le disque.
+1. Page **Paramètres** : renseignez les chemins réseau et associez le dossier des trames
+   et le registre Excel (« Parcourir… »). Réglez le **préfixe** dans la barre d'état.
+2. Page **Trames** → « Importer des trames… » : sélectionnez vos fichiers `.docx`/`.xlsx`/`.pptx`
+   à balises `[..]`. Ils sont copiés dans le dossier des trames.
+3. Créez des **modèles** (pages Trames ou Modèles) en fixant tout ou partie des balises ;
+   ou mettez à jour une trame (version rétro-compatible exigée).
+4. Page principale **« Nouveau document »** : cliquez sur une carte de modèle ou de trame →
+   saisissez le **titre**, complétez les **balises restantes** → « Générer et enregistrer ».
+5. Retrouvez les documents dans le **bandeau** (haut) ou la page **Documents** ; le
+   registre est à jour automatiquement.
 
 ## Détails techniques
 
@@ -130,9 +136,8 @@ Le classeur contient 5 feuilles : `Paramètres`, `Trames`, `Modèles`, `Document
 
 ## Prérequis
 
-- Un navigateur moderne (Chrome, Edge, Firefox, Safari récents).
-- L'enregistrement « à l'emplacement choisi » utilise l'API File System Access quand elle
-  est disponible ; sinon un téléchargement classique est proposé.
+- Un navigateur moderne ; Chrome/Edge recommandés pour la persistance automatique
+  (File System Access + IndexedDB). Sans cela, export/import manuels du registre.
 
 ## Dépôt
 

@@ -6,8 +6,25 @@ en local, et les seules entrées/sorties sont des **fichiers sur le disque**
 (sélecteurs d'ouverture, enregistrements proposés via le sélecteur de fichiers du
 navigateur, ou téléchargement selon le navigateur).
 
-> La même documentation est embarquée dans l'application : bouton
-> **« Documentation (markdown) »** en haut à droite pour l'exporter en `.md`.
+> La même documentation est embarquée dans l'application : onglet **Aide →
+> Documentation (markdown)** (ou onglet **Fichier → Exporter la documentation**) pour
+> l'exporter en `.md`.
+
+## Interface (façon suite Office)
+
+- **Barre de titre** avec icône de l'application et zone de recherche
+  « Dites-nous ce que vous voulez faire » : tapez quelques mots pour lancer directement
+  n'importe quelle commande du ruban.
+- **Ruban** à onglets : `Fichier` (vue backstage : informations, enregistrer / ouvrir le
+  registre Excel, exporter la documentation), `Accueil`, `Trames`, `Modèles`, `Documents`,
+  `Registre`, `Aide`. Chaque onglet regroupe ses commandes par **groupes**, avec des
+  **menus déroulants** (▾) pour les variantes (ex. Ouvrir → registre Excel ou fichiers de
+  trames).
+- Les **tableaux** se sélectionnent au clic (ligne bleue) : les commandes du ruban agissent
+  sur la sélection et sont désactivées tant qu'aucune ligne n'est sélectionnée.
+  **Double-clic** sur une ligne = action principale (générer un document, retélécharger).
+- **Barre d'état** en bas : compteurs (trames / modèles / documents), champ **préfixe**
+  des documents et prochain code unique.
 
 ## Concepts
 
@@ -58,7 +75,7 @@ Le classeur contient 5 feuilles : `Paramètres`, `Trames`, `Modèles`, `Document
 
 ## Utilisation pas à pas
 
-1. Renseignez le **préfixe** des documents en haut à droite.
+1. Renseignez le **préfixe** des documents dans la barre d'état (en bas à droite).
 2. Onglet **Trames** → sélectionnez un ou plusieurs fichiers `.docx`/`.xlsx`/`.pptx`
    contenant des balises `[..]` → « Importer ces trames ». Les balises détectées
    apparaissent dans le tableau.

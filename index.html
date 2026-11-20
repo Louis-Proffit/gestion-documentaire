@@ -5,121 +5,196 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gestion Documentaire</title>
 <style>
-  :root{
-    --fond:#0f172a; --panneau:#1e293b; --panneau2:#273449; --bord:#334155;
-    --texte:#e2e8f0; --attenue:#94a3b8; --accent:#38bdf8; --accent2:#0ea5e9;
-    --ok:#22c55e; --err:#ef4444; --warn:#f59e0b;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;background:var(--fond);color:var(--texte);}
-  header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 20px;background:var(--panneau);border-bottom:1px solid var(--bord);}
-  header h1{font-size:20px;margin:0;color:var(--accent);letter-spacing:.5px}
-  header .sous-titre{color:var(--attenue);font-size:12px}
-  header .spacer{flex:1}
-  .params{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--attenue)}
-  .params input{width:110px}
-  input,select,button{font:inherit}
-  input[type=text],input:not([type]){background:var(--panneau2);border:1px solid var(--bord);color:var(--texte);border-radius:6px;padding:6px 8px}
-  button{background:var(--accent2);border:none;color:#fff;border-radius:6px;padding:7px 12px;cursor:pointer;font-size:13px}
-  button:hover{background:var(--accent);color:#082f49}
-  button.secondaire{background:var(--panneau2);border:1px solid var(--bord);color:var(--texte)}
-  button.secondaire:hover{background:var(--bord)}
-  button.danger{background:#7f1d1d}
-  button.danger:hover{background:var(--err)}
-  button.petit{padding:3px 8px;font-size:12px}
-  nav{display:flex;gap:4px;padding:8px 20px 0;background:var(--panneau);border-bottom:1px solid var(--bord)}
-  nav button{background:transparent;color:var(--attenue);border-radius:6px 6px 0 0;border:1px solid transparent;border-bottom:none;padding:8px 16px}
-  nav button.active{background:var(--fond);color:var(--accent);border-color:var(--bord)}
-  main{padding:20px}
-  section.onglet{display:none}
-  section.onglet.active{display:block}
-  .carte{background:var(--panneau);border:1px solid var(--bord);border-radius:10px;padding:16px;margin-bottom:16px}
-  .carte h2{margin-top:0;font-size:16px;color:var(--accent)}
-  table{border-collapse:collapse;width:100%;font-size:13px}
-  th,td{border:1px solid var(--bord);padding:6px 8px;text-align:left;vertical-align:top}
-  th{background:var(--panneau2);color:var(--accent);white-space:nowrap}
-  tr:nth-child(even) td{background:rgba(255,255,255,.02)}
-  .balise{display:inline-block;background:#164e63;color:#a5f3fc;border-radius:4px;padding:1px 6px;margin:1px 2px;font-family:Consolas,monospace;font-size:12px}
-  .vide{color:var(--attenue);font-style:italic;padding:20px;text-align:center}
-  .modal-fond{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50}
-  .modal{background:var(--panneau);border:1px solid var(--bord);border-radius:10px;padding:20px;max-width:640px;width:92%;max-height:85vh;overflow:auto}
-  .modal h3{margin-top:0;color:var(--accent)}
-  .modal .pied{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-  .champ{margin-bottom:10px}
-  .champ label{display:block;font-size:12px;color:var(--attenue);margin-bottom:3px}
-  .champ input{width:100%}
-  .alerte{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px}
-  .alerte.err{background:#450a0a;border:1px solid var(--err);color:#fecaca}
-  .alerte.ok{background:#052e16;border:1px solid var(--ok);color:#bbf7d0}
-  .alerte.warn{background:#451a03;border:1px solid var(--warn);color:#fde68a}
-  .note{font-size:12px;color:var(--attenue)}
-  code{background:var(--panneau2);padding:1px 5px;border-radius:4px;font-family:Consolas,monospace}
-  .actions{display:flex;flex-wrap:wrap;gap:6px}
-  .onglet-registre h3{margin:18px 0 6px;color:var(--accent);font-size:14px}
-  details{margin-bottom:6px}
-  summary{cursor:pointer;color:var(--attenue);font-size:13px}
+:root{
+  --accent:#2B579A; --accent-dark:#1F3864; --accent-mid:#3A6EA5;
+  --hover:#E5F1FB; --sel:#CCE4F7; --grid:#E7E6E6; --text:#262626; --muted:#595959;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:'Segoe UI',Calibri,Arial,sans-serif;color:var(--text);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+input[type=text]{border:1px solid #ABABAB;border-radius:2px;padding:4px 6px;font:12px 'Segoe UI',Calibri,sans-serif;color:var(--text)}
+input[type=text]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+button{font-family:inherit}
+
+/* ---------- barre de titre ---------- */
+#titlebar{height:34px;background:var(--accent);color:#fff;display:flex;align-items:center;flex:none}
+.app-icon{width:34px;height:34px;background:#4472C4;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.5px;flex:none}
+.app-title{font-size:12px;margin:0 10px;white-space:nowrap}
+.tellme{position:relative;margin-left:14px}
+#tellmeInput{width:270px;height:22px;border:none;border-radius:2px;padding:0 8px;font-size:11px;color:var(--text);background:rgba(255,255,255,.95)}
+#tellmeInput::placeholder{color:#767676}
+.spacer{flex:1}
+.win-controls{display:flex;height:34px}
+.win-controls span{width:44px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:default;user-select:none}
+.win-controls span:hover{background:rgba(255,255,255,.18)}
+.win-controls span.close:hover{background:#E81123}
+
+/* ---------- ruban ---------- */
+#ribbon{flex:none;background:#fff;border-bottom:1px solid #D4D4D4}
+#ribbonTabs{display:flex;background:var(--accent);padding:0 8px;height:30px}
+.ribbon-tab{background:transparent;border:none;color:#fff;font-size:12px;padding:0 14px;cursor:pointer;border-radius:3px 3px 0 0}
+.ribbon-tab:hover{background:rgba(255,255,255,.15)}
+.ribbon-tab.active{background:#fff;color:var(--accent);font-weight:600}
+#ribbonPanels{background:#fff;min-height:96px}
+.ribbon-panel{display:none;padding:6px 10px 4px}
+.ribbon-panel.active{display:flex}
+.ribbon-group{display:flex;flex-direction:column;padding:0 10px;border-right:1px solid var(--grid)}
+.ribbon-group:last-child{border-right:none}
+.group-commands{display:flex;align-items:flex-start}
+.ribbon-group-label{font-size:10px;color:var(--muted);text-align:center;margin-top:2px;white-space:nowrap}
+.ribbon-cmd{width:72px;min-height:64px;background:transparent;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px 2px;border-radius:2px;color:var(--text)}
+.ribbon-cmd:hover:not(:disabled){background:var(--hover)}
+.ribbon-cmd:disabled{opacity:.38;cursor:default}
+.ribbon-cmd.big{width:90px}
+.cmd-icon{font-size:22px;line-height:1.1}
+.ribbon-cmd.big .cmd-icon{font-size:30px}
+.cmd-label{font-size:11px;text-align:center;line-height:1.15}
+.cmd-caret{font-size:9px;color:var(--muted)}
+
+/* ---------- menus déroulants ---------- */
+.menu-popup{position:fixed;background:#fff;border:1px solid #C8C8C8;box-shadow:0 4px 14px rgba(0,0,0,.22);min-width:240px;z-index:400;padding:3px 0}
+#tellmeMenu{position:absolute;top:24px;left:0}
+.menu-item{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;padding:6px 14px;font-size:12px;color:var(--text);cursor:pointer}
+.menu-item:hover:not(:disabled){background:var(--hover)}
+.menu-item:disabled{opacity:.4;cursor:default}
+.menu-icon{width:16px;text-align:center;font-size:13px;flex:none}
+
+/* ---------- backstage (onglet Fichier) ---------- */
+#backstage{flex:1;display:flex;min-height:0;background:#fff}
+.bs-menu{width:250px;background:#F5F5F5;border-right:1px solid #E0E0E0;padding:10px 0;flex:none;overflow:auto}
+.bs-item{display:block;width:100%;text-align:left;background:none;border:none;border-left:3px solid transparent;padding:10px 22px;font-size:13px;color:var(--text);cursor:pointer}
+.bs-item:hover{background:var(--hover)}
+.bs-item.active{background:var(--accent);color:#fff;border-left-color:#fff}
+.bs-pane{flex:1;padding:28px 44px;overflow:auto}
+.bs-pane h2{font-size:26px;font-weight:300;color:var(--accent-dark);margin:0 0 14px}
+.bs-pane p{font-size:13px;max-width:660px;line-height:1.55}
+.bs-pane ul{font-size:13px;line-height:1.7}
+.bs-version{color:var(--muted)}
+
+/* ---------- zone de contenu ---------- */
+#content{flex:1;overflow:auto;background:#F3F3F3;padding:16px 20px}
+section.onglet{display:none}
+section.onglet.active{display:block}
+.carte{background:#fff;border:1px solid #D9D9D9;padding:14px 18px;margin-bottom:14px}
+.carte h2{margin:0 0 8px;font-size:14px;color:var(--accent-dark)}
+.carte h3{margin:14px 0 6px;font-size:11px;color:var(--accent-dark);text-transform:uppercase;letter-spacing:.4px}
+.note{font-size:11px;color:var(--muted)}
+.vide{color:var(--muted);font-style:italic;padding:18px;text-align:center;background:#fff;border:1px dashed #C8C8C8}
+
+/* ---------- tableaux façon grille Office ---------- */
+table.grid{border-collapse:collapse;width:100%;background:#fff;font-size:12px}
+.grid th{background:var(--accent);color:#fff;text-align:left;padding:6px 10px;border:1px solid var(--accent);font-weight:600;white-space:nowrap}
+.grid td{border:1px solid var(--grid);padding:6px 10px;vertical-align:top}
+.grid tr[data-id]{cursor:pointer}
+.grid tr[data-id]:hover{background:#F2F8FD}
+.grid tr.selected{background:var(--sel)}
+.balise{display:inline-block;background:var(--hover);color:var(--accent-dark);border:1px solid #BDD7EE;border-radius:3px;padding:0 5px;margin:1px 2px;font-family:Consolas,monospace;font-size:11px}
+code{background:#F3F3F3;padding:1px 5px;border:1px solid var(--grid);font-family:Consolas,monospace;font-size:11px}
+
+/* ---------- accueil ---------- */
+.dash-cards{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.dash-card{background:#fff;border:1px solid #D9D9D9;border-left:4px solid var(--accent);padding:12px 20px;min-width:170px;cursor:pointer}
+.dash-card:hover{background:var(--hover)}
+.dash-nb{font-size:30px;font-weight:300;color:var(--accent)}
+.dash-lb{font-size:12px;color:var(--muted)}
+
+/* ---------- alertes ---------- */
+.alerte{border:1px solid;padding:8px 12px;margin-bottom:10px;font-size:12px;border-radius:2px}
+.alerte.ok{background:#E2F0D9;border-color:#70AD47;color:#375623}
+.alerte.err{background:#FDE9E9;border-color:#C00000;color:#9C0006}
+.alerte.warn{background:#FFF2CC;border-color:#BF8F00;color:#7F6000}
+.alerte.info{background:var(--hover);border-color:var(--accent);color:var(--accent-dark)}
+
+/* ---------- boutons et modales façon Office ---------- */
+.btn{display:inline-block;padding:5px 16px;font-size:12px;background:#fff;border:1px solid #ADADAD;border-radius:2px;color:var(--text);cursor:pointer}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-mid)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.danger{background:#fff;border-color:#C00000;color:#C00000}
+.btn.danger:hover{background:#FDE9E9}
+.modal-fond{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:500}
+.modal{background:#fff;width:620px;max-width:94vw;max-height:86vh;display:flex;flex-direction:column;border-radius:3px;box-shadow:0 6px 30px rgba(0,0,0,.35)}
+.modal h3{margin:0;padding:14px 20px;font-size:14px;font-weight:600;color:var(--text);border-bottom:1px solid var(--grid);flex:none}
+.modal .modal-body{padding:14px 20px;overflow:auto}
+.modal .pied{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--grid);flex:none}
+.champ{margin-bottom:10px}
+.champ label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.champ input{width:100%}
+details{margin-bottom:8px}
+summary{cursor:pointer;font-size:12px;color:var(--muted)}
+
+/* ---------- barre d'état ---------- */
+#statusbar{flex:none;height:26px;background:#F3F3F3;border-top:1px solid #D4D4D4;display:flex;align-items:center;gap:12px;padding:0 12px;font-size:11px;color:var(--muted)}
+#statusbar input{width:90px;height:20px;font-size:11px;padding:0 5px}
+#hiddenInputs{display:none}
+
 </style>
 </head>
 <body>
-<header>
-  <div>
-    <h1>Gestion Documentaire</h1>
-    <div class="sous-titre">Application 100&nbsp;% locale — aucune connexion réseau requise — fonctionne directement depuis le disque</div>
+<div id="titlebar">
+  <div class="app-icon">GD</div>
+  <div class="app-title">Gestion Documentaire</div>
+  <div class="tellme">
+    <input id="tellmeInput" type="text" placeholder="Dites-nous ce que vous voulez faire…" autocomplete="off">
+    <div id="tellmeMenu" class="menu-popup" hidden></div>
   </div>
   <div class="spacer"></div>
-  <div class="params">
-    <label for="paramPrefixe">Préfixe des documents&nbsp;:</label>
-    <input type="text" id="paramPrefixe" value="GD">
-  </div>
-  <button class="secondaire" id="btnImporterRegistre">Importer un registre Excel</button>
-  <button class="secondaire" id="btnExporterRegistre">Exporter le registre Excel</button>
-  <button class="secondaire" id="btnExporterDoc">Documentation (markdown)</button>
-  <input type="file" id="fichierRegistre" accept=".xlsx" hidden>
-</header>
-<nav id="navOnglets">
-  <button data-onglet="trames" class="active">Trames</button>
-  <button data-onglet="modeles">Modèles</button>
-  <button data-onglet="documents">Documents générés</button>
-  <button data-onglet="registre">Registre Excel</button>
-</nav>
-<main>
-  <section class="onglet active" id="onglet-trames">
-    <div class="carte">
-      <h2>Importer des trames</h2>
-      <p class="note">Une <strong>trame</strong> est un fichier Word (.docx), Excel (.xlsx) ou PowerPoint (.pptx) contenant des balises de la forme <code>[Nom de la balise]</code>. L'application détecte automatiquement les balises présentes dans le texte du fichier.</p>
-      <div class="actions">
-        <input type="file" id="fichiersTrames" accept=".docx,.xlsx,.pptx" multiple>
-        <button id="btnImporterTrames">Importer ces trames</button>
-      </div>
-      <div id="msgTrames"></div>
-    </div>
+  <div class="win-controls"><span title="Réduire">–</span><span title="Agrandir / Restaurer">▢</span><span class="close" title="Fermer">✕</span></div>
+</div>
+<div id="ribbon">
+  <div id="ribbonTabs"></div>
+  <div id="ribbonPanels"></div>
+</div>
+<div id="backstage" hidden>
+  <div class="bs-menu" id="bsMenu"></div>
+  <div class="bs-pane" id="bsPane"></div>
+</div>
+<main id="content">
+  <div id="msgTrames"></div>
+  <section class="onglet" id="onglet-accueil"></section>
+  <section class="onglet" id="onglet-trames">
     <div class="carte">
       <h2>Trames en mémoire</h2>
+      <p class="note">Cliquez sur une ligne pour la sélectionner (elle passe en bleu) : les commandes du ruban agissent alors sur cette trame. Double-clic sur une ligne : générer un document. Mise à jour possible uniquement si la nouvelle version reste rétro-compatible (au minimum les mêmes balises).</p>
       <div id="listeTrames"></div>
     </div>
   </section>
   <section class="onglet" id="onglet-modeles">
     <div class="carte">
       <h2>Modèles</h2>
-      <p class="note">Un <strong>modèle</strong> est une trame dont tout ou partie des balises ont été remplacées par une valeur fixe. Créez un modèle depuis l'onglet Trames.</p>
+      <p class="note">Un modèle est une trame dont tout ou partie des balises sont remplacées par une valeur fixe. Sélectionnez une ligne puis utilisez le ruban (double-clic : générer un document depuis ce modèle).</p>
       <div id="listeModeles"></div>
     </div>
   </section>
   <section class="onglet" id="onglet-documents">
     <div class="carte">
       <h2>Documents générés</h2>
+      <p class="note">Chaque document généré a un code unique et un nom de la forme prefixe-code-titre.ext. Sélectionnez une ligne puis utilisez le ruban.</p>
       <div id="listeDocuments"></div>
     </div>
   </section>
-  <section class="onglet onglet-registre" id="onglet-registre">
+  <section class="onglet" id="onglet-registre">
     <div class="carte">
       <h2>Registre Excel (consultation)</h2>
-      <p class="note">L'application conserve en mémoire les fichiers de trames ainsi que la liste des trames, modèles et documents générés. Ce tableau correspond exactement au fichier Excel exportable.</p>
+      <p class="note">Contenu exact du tableau Excel exportable : paramètres, trames, modèles, documents générés et fichiers de trames (base64).</p>
       <div id="registreHtml"></div>
     </div>
   </section>
 </main>
+<div id="statusbar">
+  <div id="statusLeft"></div>
+  <div class="spacer"></div>
+  <label for="paramPrefixe">Préfixe des documents :</label>
+  <input type="text" id="paramPrefixe" value="GD">
+  <span id="statusCode"></span>
+</div>
 <div id="modalRoot"></div>
+<div id="hiddenInputs">
+  <input type="file" id="fichiersTrames" accept=".docx,.xlsx,.pptx" multiple>
+  <input type="file" id="fichierRegistre" accept=".xlsx">
+</div>
+
 <script>
 'use strict';
 /* ============================================================
@@ -574,7 +649,10 @@ async function importRegister(st, u8){
 }
 
 /* ============================================================
-   INTERFACE UTILISATEUR
+   INTERFACE UTILISATEUR — charte graphique façon suite Office :
+   barre de titre, ruban à onglets avec groupes de commandes et
+   menus déroulants, vue backstage (Fichier), zone « dites-nous… »,
+   tableaux sélectionnables, barre d'état.
    ============================================================ */
 function $(sel, root){ return (root||document).querySelector(sel); }
 function el(tag, attrs, ...children){
@@ -590,6 +668,14 @@ function el(tag, attrs, ...children){
 }
 function fmtDate(iso){ return iso?new Date(iso).toLocaleString('fr-FR'):'—'; }
 function message(container, type, texte){ if(!container) return; container.innerHTML=''; if(texte) container.appendChild(el('div',{class:'alerte '+type}, texte)); }
+function peekCode(){ return new Date().getFullYear()+'-'+String(state.seq).padStart(4,'0'); }
+
+/* état de l'interface : onglet courant + sélections de lignes */
+const ui = { tab:'accueil', selTrame:null, selModele:null, selDocument:null, backstageFrom:'accueil' };
+function selTrame(){ return state.trames.find(t=>t.id===ui.selTrame)||null; }
+function selModele(){ return state.modeles.find(m=>m.id===ui.selModele)||null; }
+function selDocument(){ return state.documents.find(d=>d.code===ui.selDocument)||null; }
+function trameDeModele(mo){ return state.trames.find(t=>t.id===mo.trameId)||null; }
 
 /* ---------- enregistrement d'un fichier sur le disque (aucun réseau) ---------- */
 async function saveBytes(bytes, suggestedName, mime){
@@ -611,17 +697,38 @@ async function saveBytes(bytes, suggestedName, mime){
   return 'Téléchargé : '+suggestedName;
 }
 
-/* ---------- modale ---------- */
+/* ---------- menus déroulants ---------- */
+let menuRef=null;
+function closeMenu(){ if(menuRef){ menuRef.remove(); menuRef=null; } }
+function openMenu(anchor, items){
+  closeMenu();
+  const m=el('div',{class:'menu-popup'});
+  for(const it of items){
+    const b=el('button',{class:'menu-item', onclick:()=>{ closeMenu(); if(it.onClick) it.onClick(); }});
+    if(it.disabled) b.disabled=true;
+    b.appendChild(el('span',{class:'menu-icon',text:it.icon||'•'}));
+    b.appendChild(el('span',{text:it.label}));
+    m.appendChild(b);
+  }
+  document.body.appendChild(m);
+  const r=anchor.getBoundingClientRect();
+  m.style.left=Math.max(4, Math.min(r.left, window.innerWidth-260))+'px';
+  m.style.top=(r.bottom+2)+'px';
+  menuRef=m;
+  setTimeout(()=>{ document.addEventListener('mousedown', function h(e){ if(menuRef && !menuRef.contains(e.target) && e.target!==anchor){ closeMenu(); document.removeEventListener('mousedown',h); } }); }, 0);
+}
+
+/* ---------- modale façon boîte de dialogue Office ---------- */
 function openModal(titre, corps, boutons){
   const root=$('#modalRoot');
   const fond=el('div',{class:'modal-fond'});
   const m=el('div',{class:'modal'});
   m.appendChild(el('h3',{text:titre}));
-  m.appendChild(corps);
+  m.appendChild(el('div',{class:'modal-body'}, corps));
   const pied=el('div',{class:'pied'});
   const close=()=>{ fond.remove(); };
   for(const b of boutons){
-    pied.appendChild(el('button',{text:b.label, class:b.class||'', onclick:()=>{
+    pied.appendChild(el('button',{class:(b.class||'btn')+(b.primary?' primary':''), text:b.label, onclick:()=>{
       const r=b.onClick?b.onClick(close):undefined;
       if(r && typeof r.then==='function'){ r.catch(()=>{}); }       // async : le handler ferme via close()
       else if(r!==false) close();
@@ -635,6 +742,11 @@ function openModal(titre, corps, boutons){
 /* ============================================================
    LOGIQUE METIER
    ============================================================ */
+/* Vérification rétro-compatible pure : retourne la liste des balises manquantes */
+function balisesManquantes(anciennes, nouvelles){
+  return anciennes.filter(t=>!nouvelles.includes(t));
+}
+
 async function importTrames(files){
   const msg=$('#msgTrames'); const importes=[], rejetes=[];
   for(const f of files){
@@ -680,9 +792,29 @@ function demanderMiseAJourTrame(trame){
   input.click();
 }
 
-/* Vérification rétro-compatible pure : retourne la liste des balises manquantes */
-function balisesManquantes(anciennes, nouvelles){
-  return anciennes.filter(t=>!nouvelles.includes(t));
+function voirBalises(tr){
+  const corps=el('div');
+  if(tr.tags.length){
+    const ul=el('ul');
+    for(const g of tr.tags) ul.appendChild(el('li',{}, el('span',{class:'balise',text:'['+g+']'}), ' ×'+(tr.counts[g]||1)));
+    corps.appendChild(ul);
+  } else corps.appendChild(el('p',{class:'note',text:'Aucune balise [..] détectée dans ce fichier.'}));
+  openModal('Balises de « '+tr.name+' »', corps, [{label:'Fermer', class:'btn'}]);
+}
+
+function supprimerTrame(tr){
+  const nb=state.modeles.filter(m=>m.trameId===tr.id).length;
+  if(!confirm('Supprimer la trame « '+tr.name+' »'+(nb?' et ses '+nb+' modèle(s) ?':' ?'))) return;
+  state.trames=state.trames.filter(x=>x.id!==tr.id);
+  state.modeles=state.modeles.filter(m=>m.trameId!==tr.id);
+  if(ui.selTrame===tr.id) ui.selTrame=null;
+  renderAll();
+}
+function supprimerModele(mo){
+  if(!confirm('Supprimer le modèle « '+mo.name+' » ?')) return;
+  state.modeles=state.modeles.filter(m=>m.id!==mo.id);
+  if(ui.selModele===mo.id) ui.selModele=null;
+  renderAll();
 }
 
 /* ---------- modèles ---------- */
@@ -698,8 +830,8 @@ function ouvrirModaleModele(trame, modele){
   }
   corps.appendChild(el('p',{class:'note', text:'Laissez un champ vide : la balise correspondante restera à compléter lors de la génération d\'un document.'}));
   openModal(modele?'Modifier le modèle « '+modele.name+' »':'Créer un modèle depuis la trame « '+trame.name+' »', corps, [
-    {label:'Annuler', class:'secondaire'},
-    {label: modele?'Enregistrer les modifications':'Créer le modèle', onClick:()=>{
+    {label:'Annuler', class:'btn'},
+    {label: modele?'Enregistrer les modifications':'Créer le modèle', primary:true, onClick:()=>{
       const name=nomInput.value.trim()||'Modèle sans nom';
       const values={}; for(const tag of trame.tags) values[tag]=champs[tag].value;
       if(modele){ modele.name=name; modele.values=values; }
@@ -719,11 +851,18 @@ function trameSourceDe(doc){
   const tr=state.trames.find(t=>t.id===doc.sourceId);
   return tr?{ trame:tr, modele:null }:null;
 }
+function genererDepuisSelection(){
+  const m=selModele();
+  if(m){ const t=trameDeModele(m); if(t) return ouvrirGeneration(t,m); }
+  const t=selTrame();
+  if(t) return ouvrirGeneration(t,null);
+  message($('#msgTrames'),'warn','Sélectionnez d’abord une trame ou un modèle (onglets Trames / Modèles).');
+}
 function ouvrirGeneration(trame, modele){
   const tagTitre=trame.tags.find(t=>t.toLowerCase()==='titre');
   const corps=el('div');
   const zoneMsg=el('div'); corps.appendChild(zoneMsg);
-  corps.appendChild(el('p',{class:'note', text:'Source : '+(modele?'modèle « '+modele.name+' » (trame « '+trame.name+' »)':'trame « '+trame.name+' »')+'. Préfixe : « '+(state.params.prefixe||'GD')+' ». Un code unique sera attribué au document.'}));
+  corps.appendChild(el('p',{class:'note', text:'Source : '+(modele?'modèle « '+modele.name+' » (trame « '+trame.name+' »)':'trame « '+trame.name+' »')+'. Préfixe : « '+(state.params.prefixe||'GD')+' » — prochain code : '+peekCode()+'.'}));
   const titreInput=el('input',{type:'text', value:(modele&&tagTitre&&modele.values[tagTitre])||''});
   corps.appendChild(el('div',{class:'champ'}, el('label',{text:'Titre du document — équivalent de la balise ['+(tagTitre||'TITRE')+'] ; écrit dans la propriété « Titre » du fichier et dans son nom'}), titreInput));
   const champs={};
@@ -735,8 +874,8 @@ function ouvrirGeneration(trame, modele){
   }
   if(trame.tags.length) corps.appendChild(el('p',{class:'note', text:'Les balises laissées vides restent telles quelles dans le document généré.'}));
   openModal('Générer un document', corps, [
-    {label:'Annuler', class:'secondaire'},
-    {label:'Générer et enregistrer', onClick: async (close)=>{
+    {label:'Annuler', class:'btn'},
+    {label:'Générer et enregistrer', primary:true, onClick: async (close)=>{
       const titre=titreInput.value.trim();
       if(!titre){ message(zoneMsg,'err','Veuillez saisir le titre du document.'); titreInput.focus(); return; }
       const values=new Map();
@@ -771,61 +910,339 @@ async function retelechargerDocument(doc){
   }catch(e){ message($('#msgTrames'),'err','Retéléchargement impossible : '+e.message); }
 }
 
+function exporterRegistre(){ return saveBytes(buildRegister(state), 'registre-gestion-documentaire.xlsx', MIMES.xlsx); }
+function exporterDoc(){ return saveBytes(enc(DOC_MD), 'documentation-gestion-documentaire.md', 'text/markdown'); }
+function apropos(){
+  const corps=el('div');
+  corps.appendChild(el('p',{text:'Gestion Documentaire — version 1.0'}));
+  corps.appendChild(el('p',{class:'note',text:'Application monopage 100 % locale : un seul fichier index.html, aucun accès réseau, uniquement des fichiers sur le disque.'}));
+  corps.appendChild(el('p',{text:state.trames.length+' trame(s) · '+state.modeles.length+' modèle(s) · '+state.documents.length+' document(s) généré(s) · préfixe « '+(state.params.prefixe||'GD')+' » · prochain code '+peekCode()}));
+  openModal('À propos de Gestion Documentaire', corps, [{label:'Fermer', class:'btn primary'}]);
+}
+
+/* ============================================================
+   RUBAN (tabs + groupes de commandes + menus déroulants)
+   ============================================================ */
+const TABS=[
+  {id:'fichier', label:'Fichier'},
+  {id:'accueil', label:'Accueil'},
+  {id:'trames', label:'Trames'},
+  {id:'modeles', label:'Modèles'},
+  {id:'documents', label:'Documents'},
+  {id:'registre', label:'Registre'},
+  {id:'aide', label:'Aide'}
+];
+const RIBBON={
+  accueil:[
+    {group:'Trames', commands:[
+      {id:'impTrames', icon:'📥', label:'Importer des trames', big:true, run:()=>$('#fichiersTrames').click()},
+      {id:'majTrame', icon:'🔄', label:'Mettre à jour', needs:'trame', run:()=>{ const t=selTrame(); if(t) demanderMiseAJourTrame(t); }},
+      {id:'creerModele', icon:'📋', label:'Créer un modèle', needs:'trame', run:()=>{ const t=selTrame(); if(t) ouvrirModaleModele(t,null); }}
+    ]},
+    {group:'Document', commands:[
+      {id:'generer', icon:'▶️', label:'Générer un document', big:true, needs:'trameOuModele', run:genererDepuisSelection}
+    ]},
+    {group:'Registre', commands:[
+      {id:'ouvrir', icon:'📂', label:'Ouvrir', menu:[
+        {icon:'📊', label:'Registre Excel (.xlsx)…', run:()=>$('#fichierRegistre').click()},
+        {icon:'📥', label:'Fichiers de trames…', run:()=>$('#fichiersTrames').click()}
+      ]},
+      {id:'enregistrer', icon:'💾', label:'Enregistrer le registre', run:()=>exporterRegistre()}
+    ]},
+    {group:'Aide', commands:[
+      {id:'doc', icon:'📖', label:'Documentation', run:()=>exporterDoc()}
+    ]}
+  ],
+  trames:[
+    {group:'Trames', commands:[
+      {id:'impTrames2', icon:'📥', label:'Importer…', big:true, run:()=>$('#fichiersTrames').click()}
+    ]},
+    {group:'Trame sélectionnée', commands:[
+      {id:'voirBalises', icon:'🏷️', label:'Balises', needs:'trame', run:()=>{ const t=selTrame(); if(t) voirBalises(t); }},
+      {id:'majTrame2', icon:'🔄', label:'Mettre à jour', needs:'trame', run:()=>{ const t=selTrame(); if(t) demanderMiseAJourTrame(t); }},
+      {id:'creerModele2', icon:'📋', label:'Créer un modèle', needs:'trame', run:()=>{ const t=selTrame(); if(t) ouvrirModaleModele(t,null); }},
+      {id:'generer2', icon:'▶️', label:'Générer un document', big:true, needs:'trame', run:()=>{ const t=selTrame(); if(t) ouvrirGeneration(t,null); }},
+      {id:'supprTrame', icon:'🗑️', label:'Supprimer', needs:'trame', run:()=>{ const t=selTrame(); if(t) supprimerTrame(t); }}
+    ]}
+  ],
+  modeles:[
+    {group:'Nouveau', commands:[
+      {id:'creerDepuisTrame', icon:'📋', label:'Créer depuis une trame…', big:true, run:()=>{
+        const t=selTrame()||state.trames[0];
+        if(!t){ message($('#msgTrames'),'warn','Sélectionnez d’abord une trame (onglet Trames).'); return; }
+        ouvrirModaleModele(t,null);
+      }}
+    ]},
+    {group:'Modèle sélectionné', commands:[
+      {id:'modifier', icon:'✏️', label:'Modifier', needs:'modele', run:()=>{ const m=selModele(); if(m){ const t=trameDeModele(m); if(t) ouvrirModaleModele(t,m); } }},
+      {id:'genererModele', icon:'▶️', label:'Générer un document', big:true, needs:'modele', run:()=>{ const m=selModele(); if(m){ const t=trameDeModele(m); if(t) ouvrirGeneration(t,m); } }},
+      {id:'supprModele', icon:'🗑️', label:'Supprimer', needs:'modele', run:()=>{ const m=selModele(); if(m) supprimerModele(m); }}
+    ]}
+  ],
+  documents:[
+    {group:'Document sélectionné', commands:[
+      {id:'retel', icon:'⬇️', label:'Retélécharger', big:true, needs:'document', run:()=>{ const d=selDocument(); if(d) retelechargerDocument(d); }},
+      {id:'retirer', icon:'🗑️', label:'Retirer de la liste', needs:'document', run:()=>{ const d=selDocument(); if(d){ state.documents=state.documents.filter(x=>x.code!==d.code); ui.selDocument=null; renderAll(); } }}
+    ]},
+    {group:'Exporter', commands:[
+      {id:'exporter', icon:'📤', label:'Exporter', menu:[
+        {icon:'📊', label:'Registre Excel (.xlsx)…', run:()=>exporterRegistre()},
+        {icon:'📖', label:'Documentation (.md)…', run:()=>exporterDoc()}
+      ]}
+    ]}
+  ],
+  registre:[
+    {group:'Registre Excel', commands:[
+      {id:'enregistrer2', icon:'💾', label:'Enregistrer…', big:true, run:()=>exporterRegistre()},
+      {id:'ouvrir2', icon:'📂', label:'Ouvrir…', run:()=>$('#fichierRegistre').click()},
+      {id:'doc2', icon:'📖', label:'Documentation (.md)', run:()=>exporterDoc()}
+    ]}
+  ],
+  aide:[
+    {group:'Aide', commands:[
+      {id:'doc3', icon:'📖', label:'Documentation (markdown)', big:true, run:()=>exporterDoc()},
+      {id:'apropos', icon:'ℹ️', label:'À propos', run:apropos}
+    ]}
+  ]
+};
+function findCommand(id){
+  for(const tabId in RIBBON) for(const g of RIBBON[tabId]) for(const c of g.commands) if(c.id===id) return c;
+  return null;
+}
+function buildCommand(c){
+  const b=el('button',{class:'ribbon-cmd'+(c.big?' big':''), 'data-cmd':c.id});
+  b.appendChild(el('span',{class:'cmd-icon', text:c.icon||'▫️'}));
+  b.appendChild(el('span',{class:'cmd-label', text:c.label}));
+  if(c.menu){
+    b.classList.add('has-menu');
+    b.appendChild(el('span',{class:'cmd-caret', text:'▾'}));
+    b.addEventListener('click',(e)=>{ e.stopPropagation(); openMenu(b, c.menu.map(m=>({label:m.label, icon:m.icon, onClick:m.run}))); });
+  } else {
+    b.addEventListener('click',()=>{ if(!b.disabled && c.run) c.run(); });
+  }
+  return b;
+}
+function buildRibbon(){
+  const tabs=$('#ribbonTabs'); tabs.innerHTML='';
+  for(const t of TABS){
+    const b=el('button',{class:'ribbon-tab', 'data-tab':t.id, text:t.label});
+    b.addEventListener('click',()=>selectTab(t.id));
+    tabs.appendChild(b);
+  }
+  const panels=$('#ribbonPanels'); panels.innerHTML='';
+  for(const t of TABS){
+    if(t.id==='fichier') continue;
+    const p=el('div',{class:'ribbon-panel', 'data-tab':t.id});
+    for(const g of RIBBON[t.id]){
+      const gd=el('div',{class:'ribbon-group'});
+      const row=el('div',{class:'group-commands'});
+      for(const c of g.commands) row.appendChild(buildCommand(c));
+      gd.appendChild(row);
+      gd.appendChild(el('div',{class:'ribbon-group-label', text:g.group}));
+      p.appendChild(gd);
+    }
+    panels.appendChild(p);
+  }
+}
+function updateRibbonState(){
+  const t=selTrame(), m=selModele(), d=selDocument();
+  document.querySelectorAll('.ribbon-cmd').forEach(b=>{
+    const c=findCommand(b.dataset.cmd);
+    if(!c||!c.needs) return;
+    let ok=true;
+    if(c.needs==='trame') ok=!!t;
+    else if(c.needs==='modele') ok=!!m;
+    else if(c.needs==='document') ok=!!d;
+    else if(c.needs==='trameOuModele') ok=!!(t||m);
+    b.disabled=!ok;
+  });
+}
+
+/* ---------- onglet Fichier : vue backstage ---------- */
+const BS=[
+  {id:'info', label:'Informations'},
+  {id:'save', label:'Enregistrer le registre'},
+  {id:'open', label:'Ouvrir un registre'},
+  {id:'doc', label:'Exporter la documentation'},
+  {id:'retour', label:'Retour à l’application', run:()=>closeBackstage()}
+];
+function buildBackstage(){
+  const menu=$('#bsMenu'); menu.innerHTML='';
+  for(const it of BS){
+    const b=el('button',{class:'bs-item', 'data-bs':it.id, text:it.label});
+    b.addEventListener('click',()=>{ if(it.run){ it.run(); return; } selectBs(it.id); });
+    menu.appendChild(b);
+  }
+  selectBs('info');
+}
+function selectBs(id){
+  document.querySelectorAll('.bs-item').forEach(x=>x.classList.toggle('active', x.dataset.bs===id));
+  const pane=$('#bsPane'); pane.innerHTML='';
+  if(id==='info'){
+    pane.appendChild(el('h2',{text:'Gestion Documentaire'}));
+    pane.appendChild(el('p',{class:'bs-version', text:'Version 1.0 — application monopage 100 % locale (aucun réseau, fichiers du disque uniquement)'}));
+    pane.appendChild(el('p',{text:'Gérez des trames Office (.docx/.xlsx/.pptx) contenant des balises [..], mettez-les à jour en restant rétro-compatibles, créez des modèles, générez des documents nommés prefixe-code-titre avec code unique, et retrouvez le tout dans le registre Excel.'}));
+    const ul=el('ul');
+    ul.appendChild(el('li',{text:state.trames.length+' trame(s) en mémoire'}));
+    ul.appendChild(el('li',{text:state.modeles.length+' modèle(s)'}));
+    ul.appendChild(el('li',{text:state.documents.length+' document(s) généré(s)'}));
+    ul.appendChild(el('li',{text:'Préfixe : '+(state.params.prefixe||'GD')+' — prochain code : '+peekCode()}));
+    pane.appendChild(ul);
+  }
+  if(id==='save'){
+    pane.appendChild(el('h2',{text:'Enregistrer le registre'}));
+    pane.appendChild(el('p',{text:'Enregistre l’état complet de l’application (fichiers de trames, modèles, documents générés, paramètres et compteur de codes) dans un fichier Excel .xlsx sur le disque.'}));
+    pane.appendChild(el('button',{class:'btn primary', text:'Enregistrer sous… (.xlsx)', onclick:()=>exporterRegistre()}));
+  }
+  if(id==='open'){
+    pane.appendChild(el('h2',{text:'Ouvrir un registre'}));
+    pane.appendChild(el('p',{text:'Charge un registre Excel précédemment enregistré pour restaurer toute la session : trames (contenu inclus), modèles, documents, préfixe et compteur de codes.'}));
+    pane.appendChild(el('button',{class:'btn primary', text:'Ouvrir un fichier… (.xlsx)', onclick:()=>$('#fichierRegistre').click()}));
+  }
+  if(id==='doc'){
+    pane.appendChild(el('h2',{text:'Documentation'}));
+    pane.appendChild(el('p',{text:'Exporte la documentation de l’application et de son fonctionnement au format markdown (.md).'}));
+    pane.appendChild(el('button',{class:'btn primary', text:'Exporter la documentation (.md)', onclick:()=>exporterDoc()}));
+  }
+}
+function openBackstage(){
+  ui.backstageFrom=ui.tab;
+  $('#ribbonPanels').hidden=true; $('#content').hidden=true; $('#backstage').hidden=false;
+  document.querySelectorAll('.ribbon-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab==='fichier'));
+}
+function closeBackstage(){
+  $('#backstage').hidden=true; $('#ribbonPanels').hidden=false; $('#content').hidden=false;
+  selectTab(ui.backstageFrom||'accueil');
+}
+function selectTab(id){
+  if(id==='fichier'){ openBackstage(); return; }
+  $('#backstage').hidden=true; $('#ribbonPanels').hidden=false; $('#content').hidden=false;
+  ui.tab=id;
+  document.querySelectorAll('.ribbon-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+  document.querySelectorAll('.ribbon-panel').forEach(p=>p.classList.toggle('active', p.dataset.tab===id));
+  document.querySelectorAll('section.onglet').forEach(s=>s.classList.toggle('active', s.id==='onglet-'+id));
+}
+
+/* ---------- zone « Dites-nous ce que vous voulez faire » ---------- */
+function allCommands(){
+  const out=[];
+  for(const tabId in RIBBON){
+    for(const g of RIBBON[tabId]) for(const c of g.commands){
+      if(c.menu){ for(const m of c.menu) out.push({label:m.label, icon:m.icon, run:()=>{ selectTab(tabId); m.run(); }}); }
+      else if(c.run) out.push({label:c.label+' ('+g.group+')', icon:c.icon, run:()=>{ selectTab(tabId); c.run(); }});
+    }
+  }
+  return out;
+}
+function setupTellme(){
+  const inp=$('#tellmeInput'), menu=$('#tellmeMenu');
+  const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  inp.addEventListener('input',()=>{
+    const q=norm(inp.value.trim());
+    menu.innerHTML='';
+    if(!q){ menu.hidden=true; return; }
+    const res=allCommands().filter(c=>norm(c.label).includes(q)).slice(0,8);
+    if(!res.length){ menu.hidden=true; return; }
+    for(const c of res){
+      const b=el('button',{class:'menu-item', onclick:()=>{ menu.hidden=true; inp.value=''; inp.blur(); c.run(); }});
+      b.appendChild(el('span',{class:'menu-icon',text:c.icon||'•'}));
+      b.appendChild(el('span',{text:c.label}));
+      menu.appendChild(b);
+    }
+    menu.hidden=false;
+  });
+  inp.addEventListener('keydown',e=>{ if(e.key==='Escape'){ menu.hidden=true; inp.blur(); } });
+  document.addEventListener('mousedown',e=>{ if(!menu.contains(e.target)&&e.target!==inp) menu.hidden=true; });
+}
+
 /* ============================================================
    AFFICHAGE
    ============================================================ */
-function renderAll(){ renderTrames(); renderModeles(); renderDocuments(); renderRegistre(); }
+function renderAll(){
+  renderAccueil(); renderTrames(); renderModeles(); renderDocuments(); renderRegistre();
+  updateRibbonState(); updateStatusbar();
+}
+function updateStatusbar(){
+  $('#statusLeft').textContent=state.trames.length+' trame(s) · '+state.modeles.length+' modèle(s) · '+state.documents.length+' document(s) — cliquez sur une ligne pour la sélectionner';
+  $('#statusCode').textContent='Prochain code : '+peekCode();
+}
+
+function renderAccueil(){
+  const c=$('#onglet-accueil'); c.innerHTML='';
+  const cards=el('div',{class:'dash-cards'});
+  const mk=(label,count,tab)=>{
+    const d=el('div',{class:'dash-card', onclick:()=>selectTab(tab)});
+    d.appendChild(el('div',{class:'dash-nb',text:String(count)}));
+    d.appendChild(el('div',{class:'dash-lb',text:label}));
+    return d;
+  };
+  cards.appendChild(mk('Trames en mémoire', state.trames.length, 'trames'));
+  cards.appendChild(mk('Modèles', state.modeles.length, 'modeles'));
+  cards.appendChild(mk('Documents générés', state.documents.length, 'documents'));
+  c.appendChild(cards);
+  const carte=el('div',{class:'carte'});
+  carte.appendChild(el('h2',{text:'Bienvenue dans Gestion Documentaire'}));
+  carte.appendChild(el('p',{text:'Application 100 % locale : aucune donnée ne quitte votre ordinateur. Importez des trames Office contenant des balises [..] depuis le ruban, créez des modèles, puis générez des documents nommés prefixe-code-titre.ext avec un code unique.'}));
+  carte.appendChild(el('p',{class:'note',text:'Astuce : la zone « Dites-nous ce que vous voulez faire » en haut de la fenêtre permet de lancer n’importe quelle commande au clavier. Onglet Fichier : enregistrer / ouvrir le registre Excel, exporter la documentation.'}));
+  if(state.documents.length){
+    carte.appendChild(el('h3',{text:'Documents récents'}));
+    const t=el('table',{class:'grid'});
+    t.appendChild(el('tr',{}, ...['Code','Fichier','Titre','Généré le'].map(h=>el('th',{text:h}))));
+    for(const d of [...state.documents].slice(-5).reverse()){
+      const row=el('tr',{'data-id':d.code});
+      row.addEventListener('click',()=>{ selectTab('documents'); ui.selDocument=d.code; renderAll(); });
+      row.appendChild(el('td',{},el('code',{text:d.code})));
+      row.appendChild(el('td',{text:d.fileName}));
+      row.appendChild(el('td',{text:d.titre}));
+      row.appendChild(el('td',{text:fmtDate(d.date)}));
+      t.appendChild(row);
+    }
+    carte.appendChild(t);
+  }
+  c.appendChild(carte);
+}
 
 function renderTrames(){
   const c=$('#listeTrames');
-  if(!state.trames.length){ c.innerHTML='<div class="vide">Aucune trame en mémoire — importez des fichiers .docx / .xlsx / .pptx contenant des balises [..].</div>'; return; }
-  const t=el('table');
-  t.appendChild(el('tr',{}, ...['Nom','Type','Balises détectées','Dates','Actions'].map(h=>el('th',{text:h}))));
+  if(!state.trames.length){ c.innerHTML='<div class="vide">Aucune trame en mémoire — utilisez la commande « Importer des trames » du ruban.</div>'; return; }
+  const t=el('table',{class:'grid'});
+  t.appendChild(el('tr',{}, ...['Nom','Type','Balises détectées','Importée le','Mise à jour le'].map(h=>el('th',{text:h}))));
   for(const tr of state.trames){
+    const row=el('tr',{'data-id':tr.id, class: ui.selTrame===tr.id?'selected':''});
+    row.addEventListener('click',()=>{ ui.selTrame=tr.id; renderAll(); });
+    row.addEventListener('dblclick',()=>ouvrirGeneration(tr,null));
     const balises=el('span');
     if(tr.tags.length) for(const g of tr.tags) balises.appendChild(el('span',{class:'balise',text:'['+g+']'}));
     else balises.appendChild(el('span',{class:'note',text:'(aucune balise)'}));
-    const dates=el('div');
-    dates.appendChild(el('div',{class:'note',text:'import : '+fmtDate(tr.importedAt)}));
-    if(tr.updatedAt) dates.appendChild(el('div',{class:'note',text:'maj : '+fmtDate(tr.updatedAt)}));
-    const actions=el('div',{class:'actions'});
-    actions.appendChild(el('button',{class:'petit secondaire', text:'Balises', onclick:()=>{
-      const corps=el('div');
-      if(tr.tags.length){ const ul=el('ul'); for(const g of tr.tags) ul.appendChild(el('li',{}, el('span',{class:'balise',text:'['+g+']'}), ' ×'+(tr.counts[g]||1))); corps.appendChild(ul); }
-      else corps.appendChild(el('p',{class:'note',text:'Aucune balise [..] détectée dans ce fichier.'}));
-      openModal('Balises de « '+tr.name+' »', corps, [{label:'Fermer', class:'secondaire'}]);
-    }}));
-    actions.appendChild(el('button',{class:'petit secondaire', text:'Mettre à jour', onclick:()=>demanderMiseAJourTrame(tr)}));
-    actions.appendChild(el('button',{class:'petit', text:'Créer un modèle', onclick:()=>ouvrirModaleModele(tr,null)}));
-    actions.appendChild(el('button',{class:'petit', text:'Générer un document', onclick:()=>ouvrirGeneration(tr,null)}));
-    actions.appendChild(el('button',{class:'petit danger', text:'Supprimer', onclick:()=>{
-      const nb=state.modeles.filter(m=>m.trameId===tr.id).length;
-      if(!confirm('Supprimer la trame « '+tr.name+' »'+(nb?' et ses '+nb+' modèle(s) ?':' ?'))) return;
-      state.trames=state.trames.filter(x=>x.id!==tr.id);
-      state.modeles=state.modeles.filter(m=>m.trameId!==tr.id);
-      renderAll();
-    }}));
-    t.appendChild(el('tr',{}, el('td',{text:tr.name}), el('td',{text:tr.kind.toUpperCase()}), el('td',{},balises), el('td',{},dates), el('td',{},actions)));
+    row.appendChild(el('td',{text:tr.name}));
+    row.appendChild(el('td',{text:tr.kind.toUpperCase()}));
+    row.appendChild(el('td',{},balises));
+    row.appendChild(el('td',{text:fmtDate(tr.importedAt)}));
+    row.appendChild(el('td',{text: tr.updatedAt?fmtDate(tr.updatedAt):'—'}));
+    t.appendChild(row);
   }
   c.innerHTML=''; c.appendChild(t);
 }
 
 function renderModeles(){
   const c=$('#listeModeles');
-  if(!state.modeles.length){ c.innerHTML='<div class="vide">Aucun modèle — créez-en un depuis l\'onglet Trames.</div>'; return; }
-  const t=el('table');
-  t.appendChild(el('tr',{}, ...['Nom','Trame','Valeurs renseignées','Créé le','Actions'].map(h=>el('th',{text:h}))));
+  if(!state.modeles.length){ c.innerHTML='<div class="vide">Aucun modèle — créez-en un depuis le ruban (onglet Accueil ou Trames, ou « Créer depuis une trame… »).</div>'; return; }
+  const t=el('table',{class:'grid'});
+  t.appendChild(el('tr',{}, ...['Nom','Trame','Valeurs renseignées','Créé le'].map(h=>el('th',{text:h}))));
   for(const mo of state.modeles){
     const tr=state.trames.find(x=>x.id===mo.trameId);
+    const row=el('tr',{'data-id':mo.id, class: ui.selModele===mo.id?'selected':''});
+    row.addEventListener('click',()=>{ ui.selModele=mo.id; renderAll(); });
+    row.addEventListener('dblclick',()=>{ if(tr) ouvrirGeneration(tr,mo); });
     const vals=el('span');
     const remplies=Object.entries(mo.values).filter(([,v])=>v!==''&&v!=null);
     if(remplies.length) for(const [k,v] of remplies) vals.appendChild(el('div',{}, el('span',{class:'balise',text:'['+k+']'}), ' = '+v));
     else vals.appendChild(el('span',{class:'note',text:'(aucune valeur fixe — toutes les balises seront demandées à la génération)'}));
-    const actions=el('div',{class:'actions'});
-    actions.appendChild(el('button',{class:'petit secondaire', text:'Modifier', onclick:()=>{ if(tr) ouvrirModaleModele(tr,mo); }}));
-    actions.appendChild(el('button',{class:'petit', text:'Générer un document', onclick:()=>{ if(tr) ouvrirGeneration(tr,mo); }}));
-    actions.appendChild(el('button',{class:'petit danger', text:'Supprimer', onclick:()=>{ state.modeles=state.modeles.filter(m=>m.id!==mo.id); renderAll(); }}));
-    t.appendChild(el('tr',{}, el('td',{text:mo.name}), el('td',{text: tr?tr.name:'(trame supprimée)'}), el('td',{},vals), el('td',{text:fmtDate(mo.createdAt)}), el('td',{},actions)));
+    row.appendChild(el('td',{text:mo.name}));
+    row.appendChild(el('td',{text: tr?tr.name:'(trame supprimée)'}));
+    row.appendChild(el('td',{},vals));
+    row.appendChild(el('td',{text:fmtDate(mo.createdAt)}));
+    t.appendChild(row);
   }
   c.innerHTML=''; c.appendChild(t);
 }
@@ -833,14 +1250,18 @@ function renderModeles(){
 function renderDocuments(){
   const c=$('#listeDocuments');
   if(!state.documents.length){ c.innerHTML='<div class="vide">Aucun document généré pour le moment.</div>'; return; }
-  const t=el('table');
-  t.appendChild(el('tr',{}, ...['Code','Nom du fichier','Titre','Source','Généré le','Actions'].map(h=>el('th',{text:h}))));
+  const t=el('table',{class:'grid'});
+  t.appendChild(el('tr',{}, ...['Code','Nom du fichier','Titre','Source','Généré le'].map(h=>el('th',{text:h}))));
   for(const d of state.documents){
-    const actions=el('div',{class:'actions'});
-    actions.appendChild(el('button',{class:'petit', text:'Retélécharger', onclick:()=>retelechargerDocument(d)}));
-    actions.appendChild(el('button',{class:'petit danger', text:'Retirer de la liste', onclick:()=>{ state.documents=state.documents.filter(x=>x.code!==d.code); renderAll(); }}));
-    t.appendChild(el('tr',{}, el('td',{},el('code',{text:d.code})), el('td',{text:d.fileName}), el('td',{text:d.titre}),
-      el('td',{text:(d.sourceType==='modele'?'Modèle ':'Trame ')+d.sourceName}), el('td',{text:fmtDate(d.date)}), el('td',{},actions)));
+    const row=el('tr',{'data-id':d.code, class: ui.selDocument===d.code?'selected':''});
+    row.addEventListener('click',()=>{ ui.selDocument=d.code; renderAll(); });
+    row.addEventListener('dblclick',()=>retelechargerDocument(d));
+    row.appendChild(el('td',{},el('code',{text:d.code})));
+    row.appendChild(el('td',{text:d.fileName}));
+    row.appendChild(el('td',{text:d.titre}));
+    row.appendChild(el('td',{text:(d.sourceType==='modele'?'Modèle ':'Trame ')+d.sourceName}));
+    row.appendChild(el('td',{text:fmtDate(d.date)}));
+    t.appendChild(row);
   }
   c.innerHTML=''; c.appendChild(t);
 }
@@ -850,14 +1271,15 @@ function renderRegistre(){
   for(const sheet of registreSheets(state)){
     c.appendChild(el('h3',{text:'Feuille « '+sheet.name+' »'}));
     if(sheet.name==='Fichiers'){
-      const det=el('details'); det.appendChild(el('summary',{text:'Contenu des fichiers de trames (base64) — '+sheet.rows.length+' ligne(s)'}));
+      const det=el('details');
+      det.appendChild(el('summary',{text:'Contenu des fichiers de trames (base64) — '+(sheet.rows.length-1)+' fichier(s)'}));
       det.appendChild(tableDepuisLignes(sheet.rows, true));
       c.appendChild(det);
     } else c.appendChild(tableDepuisLignes(sheet.rows, false));
   }
 }
 function tableDepuisLignes(rows, tronquer){
-  const t=el('table');
+  const t=el('table',{class:'grid'});
   rows.forEach((row,r)=>{
     const tr=el('tr');
     row.forEach(cell=>{
@@ -883,6 +1305,22 @@ const DOC_MD = [
 '(sélecteurs d\'ouverture, enregistrements proposés via le sélecteur de fichiers du',
 'navigateur, ou téléchargement selon le navigateur).',
 '',
+'## Interface (façon suite Office)',
+'',
+'- **Barre de titre** avec icône de l\'application et zone de recherche',
+'  « Dites-nous ce que vous voulez faire » : tapez quelques mots pour lancer directement',
+'  n\'importe quelle commande du ruban.',
+'- **Ruban** à onglets : `Fichier` (vue backstage : informations, enregistrer / ouvrir le',
+'  registre Excel, exporter la documentation), `Accueil`, `Trames`, `Modèles`,',
+'  `Documents`, `Registre`, `Aide`. Chaque onglet regroupe ses commandes par **groupes**',
+'  avec des **menus déroulants** (▾) pour les variantes (ex. Ouvrir → registre Excel ou',
+'  fichiers de trames).',
+'- Les **tableaux** se sélectionnent au clic (ligne bleue) : les commandes du ruban agissent',
+'  sur la sélection et sont désactivées tant qu\'aucune ligne n\'est sélectionnée.',
+'  **Double-clic** sur une ligne = action principale (générer un document, retélécharger).',
+'- **Barre d\'état** en bas : compteurs (trames / modèles / documents), champ **préfixe**',
+'  des documents et prochain code unique.',
+'',
 '## Concepts',
 '',
 '- **Trame** : fichier source Word (.docx), Excel (.xlsx) ou PowerPoint (.pptx) contenant',
@@ -906,7 +1344,7 @@ const DOC_MD = [
 '  séquentiel persistant, ex. `2026-0007`).',
 '- Le fichier généré est nommé **`prefixe-code-titre.ext`**, par ex.',
 '  `GD-2026-0007-Contrat ACME.docx`.',
-'  - `prefixe` est un **paramètre de l\'application** (champ en haut à droite, `GD` par défaut) ;',
+'  - `prefixe` est un **paramètre de l\'application** (barre d\'état, en bas à droite, `GD` par défaut) ;',
 '  - `code` est le code unique ci-dessus ;',
 '  - `titre` est le **titre du document**, qui joue le rôle d\'une balise : s\'il existe une',
 '    balise `[TITRE]` dans la trame, elle est remplie avec cette valeur, et dans tous les cas',
@@ -922,9 +1360,9 @@ const DOC_MD = [
 '',
 'le tout sous la forme d\'un **tableau Excel** (`.xlsx`) que vous pouvez :',
 '',
-'- **consulter dans l\'application** (onglet « Registre Excel ») ;',
-'- **exporter** (bouton « Exporter le registre Excel ») pour le conserver sur le disque ;',
-'- **réimporter** (bouton « Importer un registre Excel ») pour restaurer toute la session',
+'- **consulter dans l\'application** (onglet « Registre ») ;',
+'- **exporter** (ruban → Enregistrer le registre, ou onglet Fichier) pour le conserver sur le disque ;',
+'- **réimporter** (ruban → Ouvrir, ou onglet Fichier) pour restaurer toute la session',
 '  (trames, modèles, documents, préfixe, compteur de codes).',
 '',
 'Le classeur contient 5 feuilles : `Paramètres`, `Trames`, `Modèles`, `Documents`,',
@@ -932,19 +1370,21 @@ const DOC_MD = [
 '',
 '## Utilisation pas à pas',
 '',
-'1. Renseignez le **préfixe** des documents en haut à droite.',
-'2. Onglet **Trames** → sélectionnez un ou plusieurs fichiers `.docx`/`.xlsx`/`.pptx`',
-'   contenant des balises `[..]` → « Importer ces trames ». Les balises détectées',
+'1. Renseignez le **préfixe** des documents dans la barre d\'état (en bas à droite).',
+'2. Onglet **Trames** → « Importer… » → sélectionnez un ou plusieurs fichiers',
+'   `.docx`/`.xlsx`/`.pptx` contenant des balises `[..]`. Les balises détectées',
 '   apparaissent dans le tableau.',
-'3. Sur une trame : « Créer un modèle » pour fixer tout ou partie des balises,',
-'   ou « Mettre à jour » pour charger une version rétro-compatible du fichier.',
-'4. Onglet **Modèles** (ou directement depuis une trame) → « Générer un document » :',
-'   saisissez le **titre**, complétez les **balises restantes**, puis validez.',
+'3. Cliquez sur une trame pour la sélectionner, puis : « Créer un modèle » pour fixer',
+'   tout ou partie des balises, ou « Mettre à jour » pour charger une version',
+'   rétro-compatible du fichier.',
+'4. Onglet **Modèles** (ou directement depuis une trame) → sélectionnez une ligne →',
+'   « Générer un document » : saisissez le **titre**, complétez les **balises restantes**,',
+'   puis validez.',
 '5. Choisissez où **enregistrer le document généré** (nommé `prefixe-code-titre.ext`).',
-'6. Onglet **Documents générés** : retrouvez la liste avec les codes uniques et',
-'   re-téléchargez un document si besoin.',
-'7. Onglet **Registre Excel** : consultez le tableau ; bouton « Exporter le registre',
-'   Excel » pour le sauvegarder sur le disque.',
+'6. Onglet **Documents** : retrouvez la liste avec les codes uniques et re-téléchargez',
+'   un document si besoin.',
+'7. Onglet **Registre** : consultez le tableau ; ruban → « Enregistrer le registre »',
+'   pour sauvegarder le fichier Excel sur le disque.',
 '',
 '## Détails techniques',
 '',
@@ -953,8 +1393,8 @@ const DOC_MD = [
 '  directement les parties XML concernées (`word/document.xml`, `ppt/slides/slideN.xml`,',
 '  `xl/sharedStrings.xml`, en-têtes/pieds de page, notes, etc.).',
 '- Les balises sont recherchées dans le **texte concaténé** de chaque partie, ce qui gère',
-'  les balises découpées en plusieurs « runs » par Word ; le remplacement reporté dans les',
-'  bons nœuds XML conserve la mise en forme du document.',
+'  les balises découpées en plusieurs « runs » par Word ; le remplacement est reporté dans',
+'  les bons nœuds XML en conservant la mise en forme du document.',
 '- Le titre est écrit dans `docProps/core.xml` (propriété `dc:title`).',
 '- Le registre Excel est un vrai fichier `.xlsx` généré et lu entièrement en local.',
 '- Aucune donnée ne quitte le navigateur : aucune requête réseau n\'est émise.',
@@ -969,24 +1409,17 @@ const DOC_MD = [
 
 /* ---------- initialisation ---------- */
 function initUI(){
-  document.querySelectorAll('#navOnglets button').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      document.querySelectorAll('#navOnglets button').forEach(x=>x.classList.toggle('active', x===b));
-      document.querySelectorAll('section.onglet').forEach(s=>s.classList.toggle('active', s.id==='onglet-'+b.dataset.onglet));
-    });
-  });
+  buildRibbon();
+  buildBackstage();
+  setupTellme();
   const pref=$('#paramPrefixe');
   pref.value=state.params.prefixe;
-  pref.addEventListener('input', ()=>{ state.params.prefixe=pref.value.trim()||'GD'; });
-  $('#btnImporterTrames').addEventListener('click', ()=>{
-    const f=$('#fichiersTrames');
-    if(f.files.length) importTrames([...f.files]);
-    else message($('#msgTrames'),'warn','Sélectionnez d\'abord un ou plusieurs fichiers de trame.');
+  pref.addEventListener('input',()=>{ state.params.prefixe=pref.value.trim()||'GD'; updateStatusbar(); });
+  $('#fichiersTrames').addEventListener('change', e=>{
+    const f=e.target.files;
+    if(f.length) importTrames([...f]);
+    e.target.value='';
   });
-  $('#btnExporterRegistre').addEventListener('click', async ()=>{
-    await saveBytes(buildRegister(state), 'registre-gestion-documentaire.xlsx', MIMES.xlsx);
-  });
-  $('#btnImporterRegistre').addEventListener('click', ()=>$('#fichierRegistre').click());
   $('#fichierRegistre').addEventListener('change', async e=>{
     const f=e.target.files[0]; if(!f) return;
     try{
@@ -997,7 +1430,7 @@ function initUI(){
     }catch(err){ message($('#msgTrames'),'err','Import du registre impossible : '+err.message); }
     e.target.value='';
   });
-  $('#btnExporterDoc').addEventListener('click', ()=>{ saveBytes(enc(DOC_MD), 'documentation-gestion-documentaire.md', 'text/markdown'); });
+  selectTab('accueil');
   renderAll();
 }
 

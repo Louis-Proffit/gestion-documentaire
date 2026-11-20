@@ -6,8 +6,8 @@
 <title>Gestion Documentaire</title>
 <style>
 :root{
-  --accent:#2B579A; --accent-dark:#1F3864; --hover:#EDF3FA; --sel:#D6E4F5;
-  --border:#D9D9D9; --bg:#F5F6F8; --text:#262626; --muted:#6B6B6B;
+  --accent:#2B579A; --accent2:#3A6EA5; --accent-dark:#1F3864;
+  --hover:#EDF3FA; --border:#D9D9D9; --bg:#F5F6F8; --text:#262626; --muted:#6B6B6B;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -17,23 +17,27 @@ input[type=text]:focus,select:focus{outline:none;border-color:var(--accent);box-
 button{font-family:inherit;cursor:pointer}
 code{background:#F0F0F0;padding:1px 5px;border:1px solid var(--border);font-family:Consolas,monospace;font-size:11px}
 
-/* ---------- barre du haut ---------- */
-#topbar{display:flex;align-items:center;background:#fff;border-bottom:1px solid var(--border);padding:0 14px;height:46px;flex:none}
-.app-icon{width:26px;height:26px;background:var(--accent);color:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px;flex:none}
-.app-title{font-size:14px;font-weight:600;color:var(--accent-dark);margin-right:20px;white-space:nowrap}
-#nav{display:flex;gap:2px;height:100%}
-#nav button{background:none;border:none;border-bottom:2px solid transparent;padding:0 14px;font-size:13px;color:var(--muted);height:100%}
-#nav button:hover{color:var(--text);background:var(--bg)}
-#nav button.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
-.spacer{flex:1}
-#topStatus{font-size:11px;color:var(--muted);max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ---------- bandeau du haut (façon Office, ludique) ---------- */
+#band{display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,var(--accent-dark),var(--accent) 55%,var(--accent2));color:#fff;padding:0 14px;height:52px;flex:none;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.app-icon{width:30px;height:30px;background:#fff;color:var(--accent-dark);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.app-title{font-size:15px;font-weight:600;white-space:nowrap}
+.app-title .ver{font-size:10px;font-weight:400;background:rgba(255,255,255,.22);border-radius:8px;padding:1px 7px;margin-left:5px;vertical-align:2px}
+.projet-box{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border-radius:5px;padding:4px 8px}
+.projet-label{font-size:11px;opacity:.85}
+#selProjet{background:#fff;border:none;border-radius:3px;font-size:12px;padding:3px 6px;max-width:200px}
+.mini{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:4px;width:24px;height:24px;font-size:13px;line-height:1}
+.mini:hover{background:rgba(255,255,255,.4)}
+#nav{display:flex;gap:4px;height:100%;margin-left:auto}
+#nav button{background:transparent;border:none;border-bottom:3px solid transparent;color:#DCE6F5;font-size:12.5px;padding:0 13px;height:100%;border-radius:4px 4px 0 0}
+#nav button:hover{background:rgba(255,255,255,.15);color:#fff}
+#nav button.active{background:#fff;color:var(--accent-dark);font-weight:700;border-bottom-color:#fff}
 
 /* ---------- bandeau des documents générés ---------- */
 #bandeau{display:flex;align-items:center;gap:8px;background:#fff;border-bottom:1px solid var(--border);padding:5px 14px;flex:none;min-height:38px;overflow-x:auto}
-.bandeau-label{font-size:11px;color:var(--muted);white-space:nowrap;font-weight:600}
+.bandeau-label{font-size:11px;color:var(--muted);white-space:nowrap;font-weight:700}
 #bandeauDocs{display:flex;gap:6px;align-items:center}
 .doc-chip{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:3px 10px;font-size:11px;color:var(--text)}
-.doc-chip:hover{border-color:var(--accent);background:var(--hover)}
+.doc-chip:hover{border-color:var(--accent);background:var(--hover);transform:translateY(-1px)}
 .doc-code{font-family:Consolas,monospace;font-weight:700;color:var(--accent-dark)}
 .doc-titre{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .link{background:none;border:none;color:var(--accent);font-size:11px;text-decoration:underline;white-space:nowrap}
@@ -44,28 +48,34 @@ code{background:#F0F0F0;padding:1px 5px;border:1px solid var(--border);font-fami
 .page.active{display:block}
 .page-title{font-size:18px;font-weight:600;color:var(--accent-dark);margin:0 0 4px}
 .grid-title{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:18px 0 8px;border-bottom:1px solid var(--border);padding-bottom:4px}
-.carte{background:#fff;border:1px solid var(--border);border-radius:6px;padding:14px 18px;margin-bottom:14px}
+.carte{background:#fff;border:1px solid var(--border);border-radius:6px;padding:14px 18px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .carte h2{margin:0 0 8px;font-size:14px;color:var(--accent-dark)}
 .note{font-size:11px;color:var(--muted)}
 .vide{color:var(--muted);font-style:italic;padding:16px;text-align:center;border:1px dashed #C8C8C8;border-radius:4px;background:#fff}
 
-/* ---------- grille de cartes (page principale) ---------- */
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
-.card{background:#fff;border:1px solid var(--border);border-radius:6px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:box-shadow .12s,border-color .12s}
-.card:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(43,87,154,.18)}
-.card.t-docx{border-top:3px solid #2B579A}
-.card.t-xlsx{border-top:3px solid #217346}
-.card.t-pptx{border-top:3px solid #C43E1C}
-.card.modele{border-top:3px solid #7030A0}
-.card-icon{font-size:24px;line-height:1.2}
-.card-name{font-size:13px;font-weight:600;word-break:break-all}
+/* ---------- grille de cartes ludiques ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:5px;transition:box-shadow .15s,transform .15s,border-color .15s;position:relative}
+.card:hover{border-color:var(--accent);box-shadow:0 6px 18px rgba(43,87,154,.22);transform:translateY(-2px)}
+.card.t-docx{border-top:4px solid #2B579A}
+.card.t-xlsx{border-top:4px solid #217346}
+.card.t-pptx{border-top:4px solid #C43E1C}
+.card.modele{border-top:4px solid #7030A0}
+.card-head{display:flex;align-items:center;gap:9px}
+.card-icon{font-size:26px;line-height:1}
+.card-name{font-size:13.5px;font-weight:700;word-break:break-all}
+.tri{font-family:Consolas,monospace;font-size:10.5px;font-weight:700;background:var(--accent);color:#fff;border-radius:3px;padding:1px 6px;letter-spacing:1px}
 .card-sub{font-size:11px;color:var(--muted)}
-.card-tags{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}
-.card-cta{margin-top:6px;font-size:11px;color:var(--accent);font-weight:600}
+.card-tags{display:flex;flex-wrap:wrap;gap:2px}
+.card-preview{background:var(--bg);border:1px solid #ECECEC;border-radius:5px;padding:6px 8px;font-size:11px;line-height:1.5;max-height:96px;overflow:hidden;color:#444}
+.prev-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prev-tag{background:#FFF1CC;border:1px solid #E0B84C;color:#7F6000;border-radius:3px;padding:0 4px;font-family:Consolas,monospace;font-size:10px}
+.prev-val{background:#E2F0D9;border:1px solid #70AD47;color:#375623;border-radius:3px;padding:0 4px;font-family:Consolas,monospace;font-size:10px}
+.card-cta{margin-top:2px;font-size:11.5px;color:var(--accent);font-weight:700}
 
 /* ---------- tableaux ---------- */
 table.grid{border-collapse:collapse;width:100%;font-size:12px}
-.grid th{background:#F0F0F0;color:var(--text);text-align:left;padding:6px 10px;border:1px solid var(--border);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.grid th{background:#F0F0F0;color:var(--text);text-align:left;padding:6px 10px;border:1px solid var(--border);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
 .grid td{border:1px solid #E7E7E7;padding:6px 10px;background:#fff;vertical-align:top}
 .grid tbody tr:hover td{background:#FAFCFF}
 .balise{display:inline-block;background:var(--hover);color:var(--accent-dark);border:1px solid #C9DCF0;border-radius:3px;padding:0 5px;margin:1px 2px;font-family:Consolas,monospace;font-size:11px}
@@ -81,11 +91,9 @@ table.grid{border-collapse:collapse;width:100%;font-size:12px}
 .btn:disabled{opacity:.45;cursor:default}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .form-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.form-row label{font-size:12px;color:var(--muted);min-width:200px}
-.form-row input[type=text]{flex:1;min-width:220px}
+.form-row label{font-size:12px;color:var(--muted)}
 .statut{font-size:11px;color:var(--muted)}
 .statut.ok{color:#217346;font-weight:600}
-.statut.err{color:#C00000}
 
 /* ---------- alertes ---------- */
 .alerte{border:1px solid;padding:8px 12px;margin-bottom:10px;font-size:12px;border-radius:4px}
@@ -94,69 +102,85 @@ table.grid{border-collapse:collapse;width:100%;font-size:12px}
 .alerte.warn{background:#FFF6DC;border-color:#BF8F00;color:#7F6000}
 .alerte.info{background:var(--hover);border-color:var(--accent);color:var(--accent-dark)}
 
-/* ---------- modales ---------- */
+/* ---------- modales (génération = large avec prévisualisation) ---------- */
 .modal-fond{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:500}
-.modal{background:#fff;width:640px;max-width:94vw;max-height:86vh;display:flex;flex-direction:column;border-radius:6px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
-.modal h3{margin:0;padding:13px 20px;font-size:14px;font-weight:600;border-bottom:1px solid var(--border);flex:none}
+.modal{background:#fff;width:640px;max-width:94vw;max-height:88vh;display:flex;flex-direction:column;border-radius:6px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.modal.large{width:980px}
+.modal h3{margin:0;padding:13px 20px;font-size:14px;font-weight:700;color:var(--accent-dark);border-bottom:1px solid var(--border);flex:none;background:linear-gradient(90deg,#F2F7FC,#fff)}
 .modal .modal-body{padding:14px 20px;overflow:auto}
 .modal .pied{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--border);flex:none}
 .champ{margin-bottom:10px}
 .champ label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
 .champ input{width:100%}
+.gen-flex{display:flex;gap:16px}
+.gen-form{flex:1;min-width:280px}
+.preview-pane{width:340px;flex:none;border:1px solid var(--border);border-radius:6px;background:var(--bg);display:flex;flex-direction:column;max-height:60vh}
+.preview-pane h4{margin:0;padding:7px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);border-bottom:1px solid var(--border);background:#fff;border-radius:6px 6px 0 0}
+.preview-body{padding:8px 10px;overflow:auto;font-size:11.5px;line-height:1.65}
+.preview-body .prev-line{white-space:normal}
 details{margin-bottom:8px}
 summary{cursor:pointer;font-size:12px;color:var(--muted)}
 
 /* ---------- barre d'état ---------- */
 #statusbar{flex:none;min-height:26px;background:#fff;border-top:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:3px 12px;font-size:11px;color:var(--muted)}
-#statusbar input{width:90px;height:20px;font-size:11px;padding:0 5px}
 
 </style>
 </head>
 <body>
-<div id="topbar">
+<div id="band">
   <div class="app-icon">GD</div>
-  <div class="app-title">Gestion Documentaire</div>
+  <div class="app-title">Gestion Documentaire <span class="ver">v1.1</span></div>
+  <div class="projet-box">
+    <span class="projet-label">Projet :</span>
+    <select id="selProjet" title="Projet actif (les types de document et modèles lui appartiennent)"></select>
+    <button class="mini" id="btnNouveauProjet" title="Nouveau projet">＋</button>
+    <button class="mini" id="btnGererProjets" title="Gérer les projets (page Paramètres)">⚙</button>
+  </div>
   <nav id="nav">
-    <button data-page="accueil" class="active">Nouveau document</button>
-    <button data-page="trames">Trames</button>
-    <button data-page="modeles">Modèles</button>
-    <button data-page="documents">Documents</button>
-    <button data-page="registre">Registre</button>
-    <button data-page="parametres">Paramètres</button>
+    <button data-page="accueil" class="active">🏠 Nouveau document</button>
+    <button data-page="typedoc">📄 Types de document</button>
+    <button data-page="modeles">📋 Modèles</button>
+    <button data-page="documents">🗂 Documents</button>
+    <button data-page="registre">📊 Registre</button>
+    <button data-page="parametres">⚙ Paramètres</button>
   </nav>
-  <div class="spacer"></div>
-  <div id="topStatus"></div>
 </div>
 <div id="bandeau">
-  <span class="bandeau-label">Documents générés :</span>
+  <span class="bandeau-label">📌 Documents générés :</span>
   <div id="bandeauDocs"></div>
   <button class="link" id="bandeauTous">voir tout →</button>
 </div>
 <main id="content">
-  <div id="msgTrames"></div>
+  <div id="msg"></div>
   <section class="page active" id="page-accueil"></section>
-  <section class="page" id="page-trames">
+  <section class="page" id="page-typedoc">
     <div class="carte">
-      <h2>Trames</h2>
-      <p class="note">Importez ici les fichiers .docx/.xlsx/.pptx contenant des balises [..]. Chaque trame importée est <strong>enregistrée dans le dossier des trames</strong> (voir Paramètres) et rechargée automatiquement à l'ouverture de l'application. Mise à jour possible uniquement si la nouvelle version reste rétro-compatible (au minimum les mêmes balises).</p>
-      <div class="btnrow">
-        <button class="btn primary" id="btnImporterTrames">Importer des trames…</button>
-        <input type="file" id="fichiersTrames" accept=".docx,.xlsx,.pptx" multiple hidden>
+      <h2>Nouveau type de document</h2>
+      <p class="note">Un <strong>type de document</strong> appartient au projet actif : il a un <strong>nom</strong>, un <strong>trigramme</strong> (3 caractères, ex. <code>CTR</code>) et une <strong>trame</strong> (fichier .docx/.xlsx/.pptx contenant des balises [..]). Le fichier est enregistré dans le dossier des trames (voir Paramètres) et rechargé automatiquement à l'ouverture.</p>
+      <div class="form-row">
+        <label for="tdNom">Nom :</label>
+        <input type="text" id="tdNom" placeholder="ex. Contrat client" style="width:180px">
+        <label for="tdTri">Trigramme :</label>
+        <input type="text" id="tdTri" maxlength="3" placeholder="CTR" style="width:70px;text-transform:uppercase">
+        <input type="file" id="tdFichier" accept=".docx,.xlsx,.pptx" hidden>
+        <button class="btn" id="btnChoisirFichier">Choisir le fichier trame…</button>
+        <button class="btn primary" id="btnCreerTD" disabled>Créer le type de document</button>
       </div>
+      <div id="tdApercu" class="note"></div>
     </div>
     <div class="carte">
-      <h2>Trames en mémoire</h2>
-      <div id="listeTrames"></div>
+      <h2>Types de document du projet</h2>
+      <div id="listeTD"></div>
     </div>
   </section>
   <section class="page" id="page-modeles">
     <div class="carte">
-      <h2>Modèles</h2>
-      <p class="note">Un modèle est une trame dont tout ou partie des balises sont remplacées par une valeur fixe.</p>
+      <h2>Modèles du projet</h2>
+      <p class="note">Un <strong>modèle</strong> appartient à un type de document du projet et possède son propre <strong>trigramme</strong> (qui remplace l'ancien préfixe : il est utilisé dans le nom des fichiers générés depuis ce modèle). Tout ou partie des balises y sont fixées.</p>
       <div class="form-row">
-        <label for="selTrameModele">Créer un modèle depuis la trame :</label>
-        <select id="selTrameModele"></select>
-        <button class="btn primary" id="btnCreerModele">Créer un modèle</button>
+        <label for="moTD">Créer un modèle depuis le type de document :</label>
+        <select id="moTD"></select>
+        <button class="btn primary" id="btnCreerModele">Nouveau modèle…</button>
       </div>
       <div id="listeModeles"></div>
     </div>
@@ -164,14 +188,14 @@ summary{cursor:pointer;font-size:12px;color:var(--muted)}
   <section class="page" id="page-documents">
     <div class="carte">
       <h2>Documents générés</h2>
-      <p class="note">Chaque document a un code unique et un nom de la forme <code>prefixe-code-titre.ext</code>. La liste complète est aussi affichée dans le bandeau en haut.</p>
+      <p class="note">Nom de fichier : <code>aaaammjj_projet_typededocument_chrono - Titre du document.ext</code>. Bouton 👁 : lire les valeurs saisies dans chaque balise. La liste est aussi dans le bandeau en haut.</p>
       <div id="listeDocuments"></div>
     </div>
   </section>
   <section class="page" id="page-registre">
     <div class="carte">
       <h2>Registre Excel</h2>
-      <p class="note">Contenu exact du tableau Excel des trames / modèles / documents générés. Si un fichier registre est configuré (voir Paramètres), il est <strong>enregistré automatiquement</strong> à chaque modification.</p>
+      <p class="note">Feuilles globales (Paramètres, Projets, Types de document, Modèles, Documents, Fichiers) <strong>plus une table par type de document</strong> (feuille « TD &lt;trigramme&gt; ») listant ses documents avec une colonne par balise. Enregistré automatiquement dans le fichier configuré (voir Paramètres).</p>
       <div class="btnrow">
         <button class="btn" id="btnExporterRegistre">Exporter le registre (.xlsx)…</button>
         <button class="btn" id="btnImporterRegistre">Importer un registre (.xlsx)…</button>
@@ -186,9 +210,7 @@ summary{cursor:pointer;font-size:12px;color:var(--muted)}
   <div id="statusLeft"></div>
   <div class="spacer"></div>
   <span id="statusPersist"></span>
-  <label for="paramPrefixe">Préfixe :</label>
-  <input type="text" id="paramPrefixe" value="GD">
-  <span id="statusCode"></span>
+  <span id="statusChrono"></span>
 </div>
 <div id="modalRoot"></div>
 
@@ -203,15 +225,17 @@ summary{cursor:pointer;font-size:12px;color:var(--muted)}
 
 /* ---------- état en mémoire ---------- */
 const state = {
-  params: { prefixe: 'GD', dossierTrames:'', registreExcel:'' }, // préfixe + chemins (réseau) du dossier des trames et du registre Excel
-  seq: 1,                       // compteur pour les codes uniques
-  chrono: 1,                    // compteur chrono pour la balise réservée [CHRONO]
-  trames: [],                   // {id, name, kind, bytes, tags, counts, slices, minChars, importedAt, updatedAt}
-  modeles: [],                  // {id, trameId, name, values:{balise:valeur}, createdAt}
-  documents: [],                // {code, prefixe, titre, fileName, sourceType, sourceId, sourceName, chrono, values, date}
+  params: { dossierTrames:'', registreExcel:'' }, // chemins (réseau) du dossier des trames et du registre Excel
+  projets: [],                  // {id, nom, createdAt} — niveau hiérarchique du haut
+  projetActif: null,            // id du projet affiché
+  chrono: 1,                    // compteur chrono : identifiant unique des documents + balise réservée [CHRONO]
+  trames: [],                   // types de document : {id, projetId, nom, trigramme, name, kind, bytes, tags, counts, slices, minChars, importedAt, updatedAt}
+  modeles: [],                  // {id, projetId, typeDocId, nom, trigramme, values, createdAt}
+  documents: [],                // {code(=chrono), chrono, date, projetId, projetNom, typeDocId, typeDocNom, trigramme, modeleId, modeleNom, titre, fileName, sourceType, sourceId, sourceName, values}
   handles: { dossierTrames:null, registreExcel:null } // FileSystemDirectoryHandle / FileSystemFileHandle (persistance auto)
 };
-const APP_VERSION='1.0';
+const APP_VERSION='1.1';
+
 
 /* ============================================================
    COEUR TECHNIQUE (pur, sans DOM — testable hors navigateur)
@@ -473,16 +497,68 @@ function nextChrono(st){
 }
 function peekChrono(st){ return String((st||state).chrono).padStart(6,'0'); }
 
-/** Fabrique et enregistre une trame à partir d'un fichier (import manuel ou dossier) */
-async function ajouterTrame(name, buf){
-  const kind=officeKind(name);
+/* ---------- trigrammes (3 caractères A-Z / 0-9) ---------- */
+function normalizeTrigramme(s){ return String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3); }
+function validateTrigramme(s){ return /^[A-Z0-9]{3}$/.test(normalizeTrigramme(s)); }
+function genTrigramme(base, projetId){
+  let t=normalizeTrigramme(String(base||'').replace(/\.[a-z0-9]+$/i,''));
+  if(!t) t='TDX';
+  while(t.length<3) t+='X';
+  let cand=t, i=1;
+  while(state.trames.some(x=>x.projetId===projetId && x.trigramme===cand)){
+    cand=t.slice(0,2)+(i%10); i++;
+    if(i>9){ cand=t.slice(0,1)+String(i).padStart(2,'0'); i=100; }
+  }
+  return cand;
+}
+
+/* ---------- type de document (ex « trame ») : nom + trigramme + fichier ---------- */
+async function ajouterTypeDocument(projetId, nom, trigramme, fileName, buf){
+  const kind=officeKind(fileName);
   if(!kind) throw new Error('type non supporté (.docx/.xlsx/.pptx attendu)');
+  trigramme=normalizeTrigramme(trigramme);
+  if(!validateTrigramme(trigramme)) throw new Error('trigramme invalide : 3 caractères A-Z/0-9 requis');
+  if(state.trames.some(t=>t.projetId===projetId && t.trigramme===trigramme))
+    throw new Error('le trigramme '+trigramme+' est déjà utilisé dans ce projet');
   const det=await detectTagsInBytes(kind, new Uint8Array(buf));
-  const tr={ id:uid(), name, kind, bytes:buf, tags:det.tags, counts:det.counts,
-    slices:det.slices||{}, minChars:det.minChars||{},
+  const td={ id:uid(), projetId, nom:(nom||'').trim()||fileName, trigramme, name:fileName, kind,
+    bytes:buf, tags:det.tags, counts:det.counts, slices:det.slices||{}, minChars:det.minChars||{},
     importedAt:new Date().toISOString(), updatedAt:null };
-  state.trames.push(tr);
-  return { tr, det };
+  state.trames.push(td);
+  return { td, det };
+}
+
+/* ---------- nom de fichier exporté : aaaammjj_projet_typededocument_chrono - Titre.ext ---------- */
+function slugPart(s){
+  return String(s).replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').replace(/\s+/g,'_').replace(/^_+|_+$/g,'').slice(0,40)||'x';
+}
+function fileNameForDoc(date, projetNom, trigramme, chrono, titre, ext){
+  const y=date.getFullYear(), m=String(date.getMonth()+1).padStart(2,'0'), j=String(date.getDate()).padStart(2,'0');
+  return ''+y+m+j+'_'+slugPart(projetNom)+'_'+normalizeTrigramme(trigramme)+'_'+chrono+' - '+sanitizeFileName(titre)+'.'+ext;
+}
+
+/* ---------- prévisualisation : lignes de texte d'un type de document (balises visibles) ---------- */
+async function extractPreviewLines(tr){
+  const u8 = tr.bytes instanceof Uint8Array ? tr.bytes : new Uint8Array(tr.bytes);
+  const zip = await zipRead(u8);
+  const re = partRegex(tr.kind);
+  const lines = [];
+  for(const p of textPartsOf(tr.kind, [...zip.keys()])){
+    if(!zip.has(p)) continue;
+    const xml = dec(zip.get(p));
+    let paras;
+    if(tr.kind==='docx') paras = xml.match(/<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g) || [];
+    else if(tr.kind==='pptx') paras = xml.match(/<a:p>[\s\S]*?<\/a:p>/g) || [];
+    else paras = (p==='xl/sharedStrings.xml') ? (xml.match(/<si>[\s\S]*?<\/si>/g)||[]) : (xml.match(/<row(?:\s[^>]*)?>[\s\S]*?<\/row>/g)||[]);
+    if(!paras.length) paras=[xml];
+    for(const para of paras){
+      const { combined } = collectSegments(para, re);
+      const t = combined.replace(/\s+/g,' ').trim();
+      if(t) lines.push(t);
+    }
+    if(lines.length>=80) break;
+  }
+  return lines.slice(0,80);
 }
 
 /* ============================================================
@@ -605,128 +681,158 @@ async function parseXlsx(u8){
   return out;
 }
 
-/* ---------- lignes du registre à partir de l'état ---------- */
+/* ---------- registre Excel : feuilles globales + UNE TABLE PAR TYPE DE DOCUMENT ---------- */
 function registreSheets(st){
   const fmtDate=iso=>iso?new Date(iso).toLocaleString('fr-FR'):'-';
+  const projets=st.projets||[];
+  const actif=projets.find(p=>p.id===st.projetActif);
+  const projetNom=id=>{ const p=projets.find(x=>x.id===id); return p? p.nom : (id||''); };
+  const plagesTxt=t=>t.tags.filter(g=>(t.slices&&t.slices[g]||[]).length)
+    .map(g=>g+': '+t.slices[g].map(s=>s.m==null?String(s.n):s.n+'-'+s.m).join(', ')).join(' ; ');
   const params=[
     ['Paramètre','Valeur'],
-    ['Préfixe des documents', st.params.prefixe],
-    ['Compteur de codes (prochain)', String(st.seq)],
+    ['Projet actif', actif? actif.nom+' ('+actif.id+')' : ''],
     ['Compteur chrono (prochain)', String(st.chrono||1)],
-    ['Nombre de trames', String(st.trames.length)],
+    ['Nombre de projets', String(projets.length)],
+    ['Nombre de types de document', String(st.trames.length)],
     ['Nombre de modèles', String(st.modeles.length)],
     ['Nombre de documents générés', String(st.documents.length)],
     ['Exporté le', new Date().toLocaleString('fr-FR')],
     ['Chemin dossier des trames', st.params.dossierTrames||''],
     ['Chemin registre Excel', st.params.registreExcel||'']
   ];
-  const plagesTxt=t=>t.tags.filter(g=>(t.slices&&t.slices[g]||[]).length)
-    .map(g=>g+': '+t.slices[g].map(s=>s.m==null?String(s.n):s.n+'-'+s.m).join(', ')).join(' ; ');
-  const trames=[
-    ['ID','Nom du fichier','Type','Nb balises','Balises détectées','Plages (balises découpées)','Importée le','Mise à jour le']
-  ].concat(st.trames.map(t=>[
-    t.id, t.name, t.kind.toUpperCase(), String(t.tags.length),
-    t.tags.map(g=>'['+g+']').join(' '), plagesTxt(t)||'—', fmtDate(t.importedAt), fmtDate(t.updatedAt)
-  ]));
-  const modeles=[
-    ['ID','Trame (ID)','Nom du modèle','Valeurs des balises (JSON)','Créé le']
-  ].concat(st.modeles.map(mo=>{
-    const tr=st.trames.find(t=>t.id===mo.trameId);
-    return [mo.id, (tr?tr.name+' ('+mo.trameId+')':mo.trameId), mo.name, JSON.stringify(mo.values), fmtDate(mo.createdAt)];
-  }));
-  const documents=[
-    ['Code','Préfixe','Titre','Nom du fichier','Source','Chrono','Valeurs utilisées (JSON)','Généré le']
-  ].concat(st.documents.map(d=>[
-    d.code, d.prefixe, d.titre, d.fileName,
-    (d.sourceType==='modele'?'Modèle ':'Trame ')+d.sourceName,
-    d.chrono||'—',
-    JSON.stringify(d.values), fmtDate(d.date)
-  ]));
-  const fichiers=[
-    ['ID trame','Nom du fichier','Taille (octets)','Contenu (base64)']
-  ].concat(st.trames.map(t=>[t.id, t.name, String(t.bytes instanceof Uint8Array ? t.bytes.length : t.bytes.byteLength), u8ToB64(t.bytes instanceof Uint8Array ? t.bytes : new Uint8Array(t.bytes))]));
-  return [
+  const projetsRows=[['ID','Nom','Créé le']].concat(projets.map(p=>[p.id, p.nom, fmtDate(p.createdAt)]));
+  const typesRows=[['ID','Projet','Nom','Trigramme','Fichier','Format','Nb balises','Balises détectées','Plages (balises découpées)','Importé le','Mis à jour le']]
+    .concat(st.trames.map(t=>[ t.id, projetNom(t.projetId), t.nom, t.trigramme, t.name, t.kind.toUpperCase(), String(t.tags.length), t.tags.map(g=>'['+g+']').join(' '), plagesTxt(t)||'—', fmtDate(t.importedAt), fmtDate(t.updatedAt) ]));
+  const modelesRows=[['ID','Projet','Type de document (ID)','Nom','Trigramme','Valeurs des balises (JSON)','Créé le']]
+    .concat(st.modeles.map(mo=>[ mo.id, projetNom(mo.projetId), mo.typeDocId, mo.nom, mo.trigramme, JSON.stringify(mo.values), fmtDate(mo.createdAt) ]));
+  const documentsRows=[['Chrono','Date','Projet','Type de document','Trigramme utilisé','Modèle','Titre','Fichier','Valeurs utilisées (JSON)']]
+    .concat(st.documents.map(d=>[ d.chrono||d.code||'', fmtDate(d.date), d.projetNom||projetNom(d.projetId), d.typeDocNom||d.sourceName||'', d.trigramme||'', d.modeleNom||'', d.titre, d.fileName, JSON.stringify(d.values) ]));
+  const fichiersRows=[['ID type de document','Fichier','Taille (octets)','Contenu (base64)']]
+    .concat(st.trames.map(t=>[ t.id, t.name, String(t.bytes instanceof Uint8Array ? t.bytes.length : t.bytes.byteLength), u8ToB64(t.bytes instanceof Uint8Array ? t.bytes : new Uint8Array(t.bytes)) ]));
+  const sheets=[
     {name:'Paramètres', rows:params},
-    {name:'Trames', rows:trames},
-    {name:'Modèles', rows:modeles},
-    {name:'Documents', rows:documents},
-    {name:'Fichiers', rows:fichiers}
+    {name:'Projets', rows:projetsRows},
+    {name:'Types de document', rows:typesRows},
+    {name:'Modèles', rows:modelesRows},
+    {name:'Documents', rows:documentsRows},
+    {name:'Fichiers', rows:fichiersRows}
   ];
+  // une table par type de document : en-tête + un document par ligne, UNE COLONNE PAR BALISE (valeurs utilisées)
+  for(const td of st.trames){
+    const rows=[
+      ['Type de document', td.nom, 'Trigramme', td.trigramme, 'Fichier', td.name, 'Format', td.kind.toUpperCase()],
+      ['Balises', td.tags.map(g=>'['+g+']').join(' '), 'Plages', plagesTxt(td)||'—'],
+      [],
+      ['Chrono','Date','Projet','Modèle','Titre','Fichier généré'].concat(td.tags)
+    ];
+    for(const d of st.documents.filter(x=>x.typeDocId===td.id)){
+      const vals={};
+      for(const [k,v] of Object.entries(d.values||{})){ const tag=td.tags.find(t=>t.toLowerCase()===k)||k; vals[tag]=v; }
+      rows.push([ d.chrono||d.code||'', fmtDate(d.date), d.projetNom||projetNom(d.projetId), d.modeleNom||'', d.titre, d.fileName ].concat(td.tags.map(g=>vals[g]||'')));
+    }
+    sheets.push({name:'TD '+td.trigramme, rows});
+  }
+  return sheets;
 }
 function buildRegister(st){ return buildXlsx(registreSheets(st)); }
 
-/* ---------- restauration de l'état depuis un registre Excel ---------- */
+/* ---------- restauration de l'état depuis un registre Excel (avec migration ancien format) ---------- */
 function rowToObj(header, row){ const o={}; header.forEach((h,i)=>{ o[h]=row[i]||''; }); return o; }
 async function importRegister(st, u8){
   const sheets=await parseXlsx(u8);
   const get=name=>sheets[name]||sheets[sanitizeSheetName(name)]||[];
-  const st2={ params:{ prefixe:'GD' }, seq:1, chrono:1, trames:[], modeles:[], documents:[] };
+  const st2={ params:{ dossierTrames:'', registreExcel:'' }, projets:[], projetActif:null, chrono:1, trames:[], modeles:[], documents:[] };
   // Paramètres
   const pr=get('Paramètres');
+  let actifName='';
   if(pr.length>1){
     pr.slice(1).forEach(r=>{ const o=rowToObj(pr[0],r);
-      if(o['Paramètre']==='Préfixe des documents' && o['Valeur']) st2.params.prefixe=o['Valeur'];
-      if(o['Paramètre']==='Compteur de codes (prochain)'){ const n=parseInt(o['Valeur'],10); if(!isNaN(n)) st2.seq=n; }
       if(o['Paramètre']==='Compteur chrono (prochain)'){ const n=parseInt(o['Valeur'],10); if(!isNaN(n)) st2.chrono=n; }
+      if(o['Paramètre']==='Projet actif') actifName=o['Valeur']||'';
       if(o['Paramètre']==='Chemin dossier des trames') st2.params.dossierTrames=o['Valeur']||'';
       if(o['Paramètre']==='Chemin registre Excel') st2.params.registreExcel=o['Valeur']||'';
     });
   }
-  // Fichiers (base64) -> map id -> bytes
+  // Projets
+  const pj=get('Projets');
+  if(pj.length>1) pj.slice(1).forEach(r=>{ const o=rowToObj(pj[0],r); if(o['ID']) st2.projets.push({ id:o['ID'], nom:o['Nom']||'Projet', createdAt:o['Créé le']||null }); });
+  // Fichiers base64 -> map id -> bytes
   const fichiers={};
   const fi=get('Fichiers');
-  if(fi.length>1) fi.slice(1).forEach(r=>{ const o=rowToObj(fi[0],r); if(o['ID trame']&&o['Contenu (base64)']) fichiers[o['ID trame']]=b64ToU8(o['Contenu (base64)']); });
-  // Trames (la détection des balises/plages est recalculée depuis le fichier restauré)
-  const tr=get('Trames');
+  if(fi.length>1) fi.slice(1).forEach(r=>{ const o=rowToObj(fi[0],r); const id=o['ID type de document']||o['ID trame']; if(id&&o['Contenu (base64)']) fichiers[id]=b64ToU8(o['Contenu (base64)']); });
+  // Types de document (migration de l'ancien format « Trames » sans projet/trigramme)
+  let tr=get('Types de document');
+  const legacy=!tr.length;
+  if(legacy) tr=get('Trames');
   if(tr.length>1){
     for(const r of tr.slice(1)){
       const o=rowToObj(tr[0],r);
-      if(!o['ID']) continue;
-      const kind=(o['Type']||'DOCX').toLowerCase();
-      const bytes=fichiers[o['ID']]||new Uint8Array(0);
+      const id=o['ID']; if(!id) continue;
+      const kind=(o['Format']||o['Type']||'DOCX').toLowerCase();
+      const bytes=fichiers[id]||new Uint8Array(0);
       let tags=[], counts={}, slices={}, minChars={};
       if(bytes.length){
-        try{
-          const det=detectTagsInZip(kind, await zipRead(bytes));
-          tags=det.tags; counts=det.counts; slices=det.slices; minChars=det.minChars;
-        }catch(e){ /* repli sur la colonne 'Balises détectées' */ }
+        try{ const det=detectTagsInZip(kind, await zipRead(bytes)); tags=det.tags; counts=det.counts; slices=det.slices; minChars=det.minChars; }catch(e){}
       }
-      if(!tags.length)
-        tags=(o['Balises détectées']||'').split(/\s+/).filter(s=>s.startsWith('[')&&s.endsWith(']')).map(s=>s.slice(1,-1));
-      st2.trames.push({ id:o['ID'], name:o['Nom du fichier']||'trame', kind, bytes, tags, counts, slices, minChars,
-        importedAt:o['Importée le']||null, updatedAt:o['Mise à jour le']||null });
+      if(!tags.length) tags=(o['Balises détectées']||'').split(/\s+/).filter(s=>s.startsWith('[')&&s.endsWith(']')).map(s=>s.slice(1,-1));
+      let projetId=o['Projet']||'';
+      if(legacy){
+        if(!st2.projets.length) st2.projets.push({ id:'p1', nom:'Projet 1', createdAt:null });
+        projetId=st2.projets[0].id;
+      } else {
+        const p=st2.projets.find(p=>p.nom===projetId||p.id===projetId); if(p) projetId=p.id; else projetId='';
+      }
+      st2.trames.push({ id, projetId, nom:o['Nom']||o['Nom du fichier']||'Type de document',
+        trigramme:normalizeTrigramme(o['Trigramme']||('TD'+String(id).replace(/[^A-Z0-9]/gi,'').slice(-2).toUpperCase().padStart(2,'0'))),
+        name:o['Fichier']||o['Nom du fichier']||'type', kind, bytes, tags, counts, slices, minChars,
+        importedAt:o['Importé le']||o['Importée le']||null, updatedAt:o['Mis à jour le']||o['Mise à jour le']||null });
     }
+  }
+  // trigrammes uniques par projet
+  const seen=new Set();
+  for(const t of st2.trames){
+    let tg=validateTrigramme(t.trigramme)? t.trigramme : 'TDX';
+    let cand=tg, i=1;
+    while(seen.has(t.projetId+':'+cand)){ cand=tg.slice(0,2)+(i%10); i++; }
+    t.trigramme=cand; seen.add(t.projetId+':'+cand);
   }
   // Modèles
   const mo=get('Modèles');
-  if(mo.length>1) mo.slice(1).forEach(r=>{ const o=rowToObj(mo[0],r);
-    if(!o['ID']) return;
+  if(mo.length>1) mo.slice(1).forEach(r=>{ const o=rowToObj(mo[0],r); if(!o['ID']) return;
     let values={}; try{ values=JSON.parse(o['Valeurs des balises (JSON)']||'{}'); }catch(e){}
-    const trameId=(o['Trame (ID)']||'').match(/\(([^)]+)\)\s*$/)?.[1]||o['Trame (ID)'];
-    st2.modeles.push({ id:o['ID'], trameId, name:o['Nom du modèle']||'modèle', values, createdAt:o['Créé le']||null });
+    let typeDocId=o['Type de document (ID)']||o['Trame (ID)']||'';
+    typeDocId=(typeDocId.match(/\(([^)]+)\)\s*$/)||[])[1]||typeDocId;
+    const p=st2.projets.find(p=>p.nom===o['Projet']||p.id===o['Projet']);
+    st2.modeles.push({ id:o['ID'], projetId:p?p.id:'', typeDocId, nom:o['Nom']||o['Nom du modèle']||'modèle',
+      trigramme:normalizeTrigramme(o['Trigramme']||'MOD'), values, createdAt:o['Créé le']||null });
   });
   // Documents
   const dc=get('Documents');
-  if(dc.length>1) dc.slice(1).forEach(r=>{ const o=rowToObj(dc[0],r);
-    if(!o['Code']) return;
+  if(dc.length>1) dc.slice(1).forEach(r=>{ const o=rowToObj(dc[0],r); const code=o['Chrono']||o['Code']; if(!code) return;
     let values={}; try{ values=JSON.parse(o['Valeurs utilisées (JSON)']||'{}'); }catch(e){}
-    const src=(o['Source']||'').replace(/^(Modèle|Trame)\s/,'')||'';
-    st2.documents.push({ code:o['Code'], prefixe:o['Préfixe']||'', titre:o['Titre']||'', fileName:o['Nom du fichier']||'',
-      sourceType:/^Modèle/i.test(o['Source']||'')?'modele':'trame', sourceId:'', sourceName:src, chrono:o['Chrono']||'', values, date:o['Généré le']||null });
+    const p=st2.projets.find(p=>p.nom===o['Projet']||p.id===o['Projet']);
+    st2.documents.push({ code, chrono:o['Chrono']||code, date:o['Date']||o['Généré le']||null,
+      projetId:p?p.id:'', projetNom:o['Projet']||'', typeDocId:'', typeDocNom:o['Type de document']||'',
+      trigramme:o['Trigramme utilisé']||'', modeleNom:o['Modèle']||'', titre:o['Titre']||'',
+      fileName:o['Fichier']||o['Nom du fichier']||'', sourceType:'', sourceId:'', sourceName:o['Type de document']||'', values });
   });
+  // projet actif
+  if(actifName){ const p=st2.projets.find(p=>actifName.startsWith(p.nom)||actifName.includes(p.id)); if(p) st2.projetActif=p.id; }
+  if(!st2.projetActif && st2.projets.length) st2.projetActif=st2.projets[0].id;
   // remplace l'état courant
-  st.params=st2.params; st.seq=st2.seq; st.chrono=st2.chrono; st.trames=st2.trames; st.modeles=st2.modeles; st.documents=st2.documents;
+  st.params=st2.params; st.projets=st2.projets; st.projetActif=st2.projetActif; st.chrono=st2.chrono;
+  st.trames=st2.trames; st.modeles=st2.modeles; st.documents=st2.documents;
   return st2;
 }
 
 /* ============================================================
-   INTERFACE UTILISATEUR
-   - page principale « Nouveau document » : grille de cartes
-     modèles + trames (clic = générer un document)
-   - bandeau des documents générés sous le menu
-   - pages secondaires : Trames, Modèles, Documents, Registre, Paramètres
-   - persistance automatique : dossier des trames + registre Excel
-     (chemins réseau en paramètres, handles conservés en IndexedDB)
+   INTERFACE UTILISATEUR v1.1
+   Hiérarchie : PROJET (en haut, dans le bandeau) > types de
+   document + modèles. Page principale = grille de cartes avec
+   prévisualisation. Bandeau des documents générés. Pages
+   secondaires : Types de document, Modèles, Documents, Registre,
+   Paramètres. Persistance auto : dossier des trames + registre.
    ============================================================ */
 function $(sel, root){ return (root||document).querySelector(sel); }
 function el(tag, attrs, ...children){
@@ -742,11 +848,12 @@ function el(tag, attrs, ...children){
 }
 function fmtDate(iso){ return iso?new Date(iso).toLocaleString('fr-FR'):'—'; }
 function message(container, type, texte){ if(!container) return; container.innerHTML=''; if(texte) container.appendChild(el('div',{class:'alerte '+type}, texte)); }
-function peekCode(){ return new Date().getFullYear()+'-'+String(state.seq).padStart(4,'0'); }
 
 const ui = { page:'accueil' };
+function projetActif(){ return state.projets.find(p=>p.id===state.projetActif)||state.projets[0]||null; }
+function tdOfModele(mo){ return state.trames.find(t=>t.id===mo.typeDocId)||null; }
 
-/* ---------- enregistrement d'un fichier sur le disque (aucun réseau) ---------- */
+/* ---------- enregistrement d’un fichier sur le disque (aucun réseau) ---------- */
 async function saveBytes(bytes, suggestedName, mime){
   const ext=(suggestedName.split('.').pop()||'').toLowerCase();
   if(window.showSaveFilePicker){
@@ -757,7 +864,7 @@ async function saveBytes(bytes, suggestedName, mime){
       await w.write(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
       await w.close();
       return 'Enregistré sur le disque : '+suggestedName;
-    }catch(err){ if(err && err.name==='AbortError') return null; /* repli : téléchargement */ }
+    }catch(err){ if(err && err.name==='AbortError') return null; }
   }
   const blob=new Blob([bytes],{type:mime||'application/octet-stream'});
   const a=el('a',{href:URL.createObjectURL(blob), download:suggestedName});
@@ -767,10 +874,10 @@ async function saveBytes(bytes, suggestedName, mime){
 }
 
 /* ---------- modale ---------- */
-function openModal(titre, corps, boutons){
+function openModal(titre, corps, boutons, large){
   const root=$('#modalRoot');
   const fond=el('div',{class:'modal-fond'});
-  const m=el('div',{class:'modal'});
+  const m=el('div',{class:'modal'+(large?' large':'')});
   m.appendChild(el('h3',{text:titre}));
   m.appendChild(el('div',{class:'modal-body'}, corps));
   const pied=el('div',{class:'pied'});
@@ -789,8 +896,6 @@ function openModal(titre, corps, boutons){
 
 /* ============================================================
    PERSISTANCE AUTOMATIQUE (dossier des trames + registre Excel)
-   Les handles File System Access sont conservés en IndexedDB :
-   à l'ouverture, on recharge le registre puis les trames du dossier.
    ============================================================ */
 function idbOpen(){
   return new Promise((res,rej)=>{
@@ -807,39 +912,41 @@ async function idbGet(k){
   const db=await idbOpen();
   return new Promise((res,rej)=>{ const q=db.transaction('handles','readonly').objectStore('handles').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); });
 }
-
-async function ecrireTrameDansDossier(tr){
+async function ecrireTDDansDossier(td){
   const dir=state.handles.dossierTrames; if(!dir) return false;
   try{
-    const fh=await dir.getFileHandle(tr.name,{create:true});
+    const fh=await dir.getFileHandle(td.name,{create:true});
     const w=await fh.createWritable();
-    await w.write(tr.bytes instanceof Uint8Array ? tr.bytes : new Uint8Array(tr.bytes));
+    await w.write(td.bytes instanceof Uint8Array ? td.bytes : new Uint8Array(td.bytes));
     await w.close();
     return true;
-  }catch(e){ message($('#msgTrames'),'warn','Écriture de « '+tr.name+' » dans le dossier des trames impossible : '+e.message); return false; }
+  }catch(e){ message($('#msg'),'warn','Écriture de « '+td.name+' » dans le dossier des trames impossible : '+e.message); return false; }
 }
-async function supprimerTrameDuDossier(name){
+async function supprimerTDDuDossier(name){
   const dir=state.handles.dossierTrames; if(!dir) return;
-  try{ await dir.removeEntry(name); }catch(e){ /* déjà absent */ }
+  try{ await dir.removeEntry(name); }catch(e){}
 }
 async function chargerTramesDepuisDossier(dir){
   let n=0;
+  const projetId=state.projetActif||(state.projets[0]&&state.projets[0].id);
+  if(!projetId) return 0;
   for await (const entry of dir.entries()){
     const name=entry[0], handle=entry[1];
     if(handle.kind!=='file' || !officeKind(name)) continue;
-    if(state.trames.some(t=>t.name===name)) continue; // déjà connu (ex. via le registre)
+    if(state.trames.some(t=>t.projetId===projetId && t.name===name)) continue;
     try{
       const f=await handle.getFile();
-      await ajouterTrame(name, await f.arrayBuffer());
+      const buf=await f.arrayBuffer();
+      const tri=genTrigramme(name, projetId);
+      await ajouterTypeDocument(projetId, name.replace(/\.[a-z0-9]+$/i,''), tri, name, buf);
       n++;
-    }catch(e){ /* fichier illisible : ignoré */ }
+    }catch(e){}
   }
   return n;
 }
 async function chargerRegistreDepuisHandle(fh){
   const f=await fh.getFile();
   await importRegister(state, new Uint8Array(await f.arrayBuffer()));
-  const pref=$('#paramPrefixe'); if(pref) pref.value=state.params.prefixe;
   const pd=$('#pathDossier'); if(pd) pd.value=state.params.dossierTrames||'';
   const pr=$('#pathRegistre'); if(pr) pr.value=state.params.registreExcel||'';
 }
@@ -860,13 +967,12 @@ function persisterAuto(){
 async function restaurerPersistance(){
   const msgs=[];
   if(!('indexedDB' in window) || !window.showDirectoryPicker){
-    msgs.push('persistance auto indisponible dans ce navigateur (Chrome/Edge requis) — export/import manuels disponibles dans Paramètres');
+    msgs.push('persistance auto indisponible dans ce navigateur (Chrome/Edge requis) — export/import manuels dans Paramètres');
     return msgs;
   }
   let h=null;
   try{ h=await idbGet('handles'); }catch(e){ h=null; }
   if(!h) return msgs;
-  // 1. registre Excel d'abord (contient tout, y compris les trames en base64)
   if(h.registreExcel){
     try{
       let perm=await h.registreExcel.queryPermission({mode:'readwrite'});
@@ -874,11 +980,10 @@ async function restaurerPersistance(){
       if(perm==='granted'){
         state.handles.registreExcel=h.registreExcel;
         await chargerRegistreDepuisHandle(h.registreExcel);
-        msgs.push('registre rechargé depuis le fichier configuré');
+        msgs.push('registre rechargé');
       }
     }catch(e){ msgs.push('registre non relu : '+e.message); }
   }
-  // 2. dossier des trames : ajoute les trames inconnues du registre
   if(h.dossierTrames){
     try{
       let perm=await h.dossierTrames.queryPermission({mode:'readwrite'});
@@ -886,7 +991,7 @@ async function restaurerPersistance(){
       if(perm==='granted'){
         state.handles.dossierTrames=h.dossierTrames;
         const n=await chargerTramesDepuisDossier(h.dossierTrames);
-        if(n) msgs.push(n+' trame(s) rechargée(s) depuis le dossier');
+        if(n) msgs.push(n+' type(s) de document rechargé(s) depuis le dossier des trames');
       }
     }catch(e){ msgs.push('dossier des trames non relu : '+e.message); }
   }
@@ -894,222 +999,331 @@ async function restaurerPersistance(){
 }
 
 /* ============================================================
-   LOGIQUE METIER
+   PROJETS
    ============================================================ */
-function balisesManquantes(anciennes, nouvelles){
-  return anciennes.filter(t=>!nouvelles.includes(t));
+function nouveauProjet(){
+  const corps=el('div');
+  const nom=el('input',{type:'text', placeholder:'ex. Projet Alpha'});
+  corps.appendChild(el('div',{class:'champ'}, el('label',{text:'Nom du projet'}), nom));
+  corps.appendChild(el('p',{class:'note', text:'Le projet est le niveau hiérarchique du haut : les types de document et les modèles lui appartiennent.'}));
+  openModal('Nouveau projet', corps, [
+    {label:'Annuler', class:'btn'},
+    {label:'Créer', primary:true, onClick:()=>{
+      const n=nom.value.trim(); if(!n){ message(corps,'err','Saisissez un nom.'); return; }
+      if(state.projets.some(p=>p.nom.toLowerCase()===n.toLowerCase())){ message(corps,'err','Ce nom existe déjà.'); return; }
+      const p={ id:uid(), nom:n, createdAt:new Date().toISOString() };
+      state.projets.push(p); state.projetActif=p.id;
+      renderAll();
+    }}
+  ]);
 }
-
-async function importTrames(files){
-  const msg=$('#msgTrames'); const importes=[], rejetes=[];
-  for(const f of files){
-    try{
-      const buf=await f.arrayBuffer();
-      const exist=state.trames.findIndex(t=>t.name===f.name);
-      const { tr, det }=await ajouterTrame(f.name, buf);
-      if(exist>=0) state.trames.splice(exist,1,tr); // même nom -> remplacement
-      await ecrireTrameDansDossier(tr);               // persistance dans le dossier des trames
-      importes.push(f.name+' → '+(det.tags.length? det.tags.length+' balise(s) : '+det.tags.map(t=>'['+t+']').join(', ') : 'aucune balise détectée'));
-    }catch(e){ rejetes.push(f.name+' ('+e.message+')'); }
-  }
-  const txt=(importes.length?'Importées : '+importes.join(' ; '):'')+(importes.length&&rejetes.length?' — ':'')+(rejetes.length?'Rejetées : '+rejetes.join(' ; '):'');
-  message(msg, rejetes.length&&!importes.length?'err':(rejetes.length?'warn':'ok'), txt);
+function supprimerProjet(p){
+  const nbTD=state.trames.filter(t=>t.projetId===p.id).length;
+  const nbMo=state.modeles.filter(m=>m.projetId===p.id).length;
+  if(!confirm('Supprimer le projet « '+p.nom+' » et tout ce qu\'il contient ('+nbTD+' type(s) de document, '+nbMo+' modèle(s)) ?')) return;
+  state.projets=state.projets.filter(x=>x.id!==p.id);
+  state.trames=state.trames.filter(t=>t.projetId!==p.id);
+  state.modeles=state.modeles.filter(m=>m.projetId!==p.id);
+  if(state.projetActif===p.id) state.projetActif=state.projets[0]? state.projets[0].id : null;
   renderAll();
 }
 
-/* Mise à jour d'une trame : rétro-compatible (au minimum les mêmes balises) */
-function demanderMiseAJourTrame(trame){
-  const input=document.createElement('input');
-  input.type='file'; input.accept='.'+trame.kind;
-  input.onchange=async ()=>{
-    if(!input.files.length) return;
-    const f=input.files[0]; const msg=$('#msgTrames');
-    try{
-      const kind=officeKind(f.name);
-      if(kind!==trame.kind) throw new Error('le type change ('+(kind||'inconnu')+' au lieu de '+trame.kind+')');
-      const buf=await f.arrayBuffer();
-      const det=await detectTagsInBytes(kind, new Uint8Array(buf));
-      const anciennes=trame.tags;
-      const manquantes=balisesManquantes(anciennes, det.tags);
-      if(manquantes.length)
-        throw new Error('rétro-compatibilité rompue : balise(s) manquante(s) '+manquantes.map(t=>'['+t+']').join(', '));
-      const nouvelles=det.tags.filter(t=>!anciennes.includes(t));
-      trame.name=f.name; trame.bytes=buf; trame.tags=det.tags; trame.counts=det.counts;
-      trame.slices=det.slices||{}; trame.minChars=det.minChars||{};
-      trame.updatedAt=new Date().toISOString();
-      await ecrireTrameDansDossier(trame); // réécrit le fichier dans le dossier des trames
-      message(msg,'ok','Trame « '+trame.name+' » mise à jour ('+det.tags.length+' balise(s))'+(nouvelles.length?', nouvelles : '+nouvelles.map(t=>'['+t+']').join(', '):', aucune ajoutée')+'. Modèles toujours valides.');
-      renderAll();
-    }catch(e){ message(msg,'err','Mise à jour de « '+trame.name+' » REFUSÉE : '+e.message); }
-  };
-  input.click();
-}
-
-/* texte des plages d'une balise découpée, ex. "2, 3-5" */
+/* ============================================================
+   TYPES DE DOCUMENT (ex « trames »)
+   ============================================================ */
+function balisesManquantes(anciennes, nouvelles){ return anciennes.filter(t=>!nouvelles.includes(t)); }
 function plageText(tag, slices){
   const arr=(slices&&slices[tag])||[];
   return arr.map(s=> s.m==null? String(s.n) : s.n+'-'+s.m).join(', ');
 }
-function minCharsText(tr, tag){
-  const mc=(tr.minChars&&tr.minChars[tag])||0;
+function minCharsText(td, tag){
+  const mc=(td.minChars&&td.minChars[tag])||0;
   return mc? 'valeur d’au moins '+mc+' caractère(s)' : '';
 }
-function voirBalises(tr){
+
+let pendingTD=null; // {name, buf} en attente de nom/trigramme
+function choisirFichierTD(){
+  $('#tdFichier').click();
+}
+async function onFichierTDChange(input){
+  const f=input.files[0]; if(!f) return;
+  try{
+    const buf=await f.arrayBuffer();
+    const kind=officeKind(f.name);
+    if(!kind) throw new Error('type non supporté');
+    const det=await detectTagsInBytes(kind, new Uint8Array(buf));
+    pendingTD={ name:f.name, buf };
+    const ap=$('#tdApercu');
+    ap.innerHTML='';
+    ap.appendChild(el('span',{text:'Fichier « '+f.name+' » : '+(det.tags.length? det.tags.length+' balise(s) détectée(s) : '+det.tags.map(t=>'['+t+']').join(', ') : 'aucune balise')+' — renseignez le nom et le trigramme puis créez.'}));
+    const tri=normalizeTrigramme(f.name.replace(/\.[a-z0-9]+$/i,''));
+    if(tri && !$('#tdTri').value) $('#tdTri').value=tri.slice(0,3).toUpperCase();
+    $('#btnCreerTD').disabled=false;
+  }catch(e){ message($('#msg'),'err','Lecture du fichier impossible : '+e.message); pendingTD=null; $('#btnCreerTD').disabled=true; }
+  input.value='';
+}
+async function creerTD(){
+  const p=projetActif();
+  if(!p){ message($('#msg'),'warn','Créez d’abord un projet (bouton ＋ dans le bandeau).'); return; }
+  if(!pendingTD){ message($('#msg'),'warn','Choisissez d’abord un fichier trame.'); return; }
+  try{
+    const nom=$('#tdNom').value.trim()||pendingTD.name;
+    const tri=$('#tdTri').value;
+    const { td, det }=await ajouterTypeDocument(p.id, nom, tri, pendingTD.name, pendingTD.buf);
+    await ecrireTDDansDossier(td);
+    message($('#msg'),'ok','Type de document « '+td.nom+' » ('+td.trigramme+') créé depuis « '+td.name+' » — '+det.tags.length+' balise(s).');
+    pendingTD=null; $('#tdNom').value=''; $('#tdTri').value=''; $('#tdApercu').innerHTML=''; $('#btnCreerTD').disabled=true;
+    renderAll();
+  }catch(e){ message($('#msg'),'err','Création impossible : '+e.message); }
+}
+
+function demanderMiseAJourTD(td){
+  const input=document.createElement('input');
+  input.type='file'; input.accept='.'+td.kind;
+  input.onchange=async ()=>{
+    if(!input.files.length) return;
+    const f=input.files[0];
+    try{
+      const kind=officeKind(f.name);
+      if(kind!==td.kind) throw new Error('le format change ('+(kind||'inconnu')+' au lieu de '+td.kind+')');
+      const buf=await f.arrayBuffer();
+      const det=await detectTagsInBytes(kind, new Uint8Array(buf));
+      const manquantes=balisesManquantes(td.tags, det.tags);
+      if(manquantes.length) throw new Error('rétro-compatibilité rompue : balise(s) manquante(s) '+manquantes.map(t=>'['+t+']').join(', '));
+      const nouvelles=det.tags.filter(t=>!td.tags.includes(t));
+      td.name=f.name; td.bytes=buf; td.tags=det.tags; td.counts=det.counts; td.slices=det.slices||{}; td.minChars=det.minChars||{};
+      td.updatedAt=new Date().toISOString(); td._preview=null;
+      await ecrireTDDansDossier(td);
+      message($('#msg'),'ok','Type de document « '+td.nom+' » mis à jour ('+det.tags.length+' balise(s))'+(nouvelles.length?', nouvelles : '+nouvelles.map(t=>'['+t+']').join(', '):', aucune ajoutée')+'. Modèles toujours valides.');
+      renderAll();
+    }catch(e){ message($('#msg'),'err','Mise à jour REFUSÉE : '+e.message); }
+  };
+  input.click();
+}
+
+function voirBalises(td){
   const corps=el('div');
-  if(tr.tags.length){
+  if(td.tags.length){
     const ul=el('ul');
-    for(const g of tr.tags){
-      const li=el('li',{}, el('span',{class:'balise',text:'['+g+']'}), ' ×'+(tr.counts[g]||1));
-      if(isReservedTag(g))
-        li.appendChild(el('div',{class:'note', text:'Balise RÉSERVÉE : remplie automatiquement par le numéro chrono à la génération — jamais saisie.'}));
-      const pl=plageText(g, tr.slices);
-      if(pl)
-        li.appendChild(el('div',{class:'note', text:'Balises découpées : ['+g+'-n] / ['+g+'-n-m] → plages '+pl+' ('+minCharsText(tr,g)+'). Seuls ces caractères de la valeur seront insérés.'}));
+    for(const g of td.tags){
+      const li=el('li',{}, el('span',{class:'balise',text:'['+g+']'}), ' ×'+(td.counts[g]||1));
+      if(isReservedTag(g)) li.appendChild(el('div',{class:'note', text:'Balise RÉSERVÉE : remplie automatiquement par le numéro chrono — jamais saisie.'}));
+      const pl=plageText(g, td.slices);
+      if(pl) li.appendChild(el('div',{class:'note', text:'Balises découpées : ['+g+'-n] / ['+g+'-n-m] → plages '+pl+' ('+minCharsText(td,g)+').'}));
       ul.appendChild(li);
     }
     corps.appendChild(ul);
-  } else corps.appendChild(el('p',{class:'note',text:'Aucune balise [..] détectée dans ce fichier.'}));
-  openModal('Balises de « '+tr.name+' »', corps, [{label:'Fermer', class:'btn'}]);
+  } else corps.appendChild(el('p',{class:'note',text:'Aucune balise [..] détectée.'}));
+  openModal('Balises de « '+td.nom+' » ('+td.trigramme+')', corps, [{label:'Fermer', class:'btn'}]);
 }
 
-async function supprimerTrame(tr){
-  const nb=state.modeles.filter(m=>m.trameId===tr.id).length;
-  if(!confirm('Supprimer la trame « '+tr.name+' »'+(nb?' et ses '+nb+' modèle(s) ?':' ?')+' Le fichier sera aussi retiré du dossier des trames.')) return;
-  state.trames=state.trames.filter(x=>x.id!==tr.id);
-  state.modeles=state.modeles.filter(m=>m.trameId!==tr.id);
-  await supprimerTrameDuDossier(tr.name);
-  renderAll();
-}
-function supprimerModele(mo){
-  if(!confirm('Supprimer le modèle « '+mo.name+' » ?')) return;
-  state.modeles=state.modeles.filter(m=>m.id!==mo.id);
+async function supprimerTD(td){
+  const nb=state.modeles.filter(m=>m.typeDocId===td.id).length;
+  if(!confirm('Supprimer le type de document « '+td.nom+' » ('+td.trigramme+')'+(nb?' et ses '+nb+' modèle(s) ?':' ?')+' Le fichier sera aussi retiré du dossier des trames.')) return;
+  state.trames=state.trames.filter(x=>x.id!==td.id);
+  state.modeles=state.modeles.filter(m=>m.typeDocId!==td.id);
+  await supprimerTDDuDossier(td.name);
   renderAll();
 }
 
-/* ---------- modèles ---------- */
-function trameDeModele(mo){ return state.trames.find(t=>t.id===mo.trameId)||null; }
-function ouvrirModaleModele(trame, modele){
+/* ---------- prévisualisation ---------- */
+async function ensurePreview(td){
+  if(!td._preview){ try{ td._preview=await extractPreviewLines(td); }catch(e){ td._preview=[]; } }
+  return td._preview;
+}
+function appendPreviewLine(div, line, values){
+  TAG_RE.lastIndex=0; let last=0, m;
+  while((m=TAG_RE.exec(line))!==null){
+    if(m.index>last) div.appendChild(document.createTextNode(line.slice(last,m.index)));
+    const parsed=parseTagInner(m[1]);
+    const v=values? values.get(parsed.base.toLowerCase()) : undefined;
+    const filled = v!=null && v!=='';
+    const chip=el('span',{class: filled?'prev-val':'prev-tag', text: filled? v : m[0]});
+    chip.title='['+m[1]+']'+(filled?' = '+v:'');
+    div.appendChild(chip);
+    last=m.index+m[0].length;
+  }
+  if(last<line.length) div.appendChild(document.createTextNode(line.slice(last)));
+}
+function fillPreview(container, lines, values, maxLignes){
+  container.innerHTML='';
+  if(!lines||!lines.length){ container.appendChild(el('span',{class:'note',text:'(aucun texte)'})); return; }
+  const n=maxLignes||lines.length;
+  for(const line of lines.slice(0,n)){
+    const div=el('div',{class:'prev-line'});
+    appendPreviewLine(div, line, values);
+    container.appendChild(div);
+  }
+  if(lines.length>n) container.appendChild(el('div',{class:'note',text:'… +'+(lines.length-n)+' ligne(s)'}));
+}
+
+/* ============================================================
+   MODELES (avec trigramme, qui remplace l’ancien préfixe)
+   ============================================================ */
+function ouvrirModaleModele(td, modele){
+  const p=projetActif();
   const corps=el('div');
-  const nomInput=el('input',{type:'text', value: modele?modele.name:''});
-  corps.appendChild(el('div',{class:'champ'}, el('label',{text:'Nom du modèle'}), nomInput));
+  const nomInput=el('input',{type:'text', value: modele?modele.nom:''});
+  const triInput=el('input',{type:'text', value: modele?modele.trigramme:'', maxlength:'3', style:'width:70px;text-transform:uppercase'});
+  const head=el('div',{class:'form-row'});
+  head.appendChild(el('label',{text:'Nom :'})); head.appendChild(nomInput);
+  head.appendChild(el('label',{text:'Trigramme :'})); head.appendChild(triInput);
+  head.appendChild(el('span',{class:'note', text:'3 caractères A-Z/0-9, unique dans le projet — utilisé dans le nom des fichiers générés depuis ce modèle.'}));
+  corps.appendChild(head);
   const champs={};
-  const aSaisir=trame.tags.filter(t=>!isReservedTag(t));
-  const reservees=trame.tags.filter(isReservedTag);
+  const aSaisir=td.tags.filter(t=>!isReservedTag(t));
+  const reservees=td.tags.filter(isReservedTag);
   for(const tag of aSaisir){
     const inp=el('input',{type:'text', value: modele?(modele.values[tag]||''):''});
     champs[tag]=inp;
     const champ=el('div',{class:'champ'}, el('label',{text:'Balise ['+tag+']'}), inp);
-    const pl=plageText(tag, trame.slices);
-    if(pl) champ.appendChild(el('div',{class:'note', text:'Plages utilisées : '+pl+' → renseignez la valeur complète ('+minCharsText(trame,tag)+').'}));
+    const pl=plageText(tag, td.slices);
+    if(pl) champ.appendChild(el('div',{class:'note', text:'Plages : '+pl+' → valeur complète ('+minCharsText(td,tag)+').'}));
     corps.appendChild(champ);
   }
-  if(reservees.length)
-    corps.appendChild(el('p',{class:'note', text:'Balise(s) réservée(s) '+reservees.map(g=>'['+g+']').join(', ')+' : jamais saisies — le numéro chrono est généré automatiquement à la génération.'}));
-  corps.appendChild(el('p',{class:'note', text:'Laissez un champ vide : la balise restera à compléter à la génération d\'un document.'}));
-  openModal(modele?'Modifier le modèle « '+modele.name+' »':'Créer un modèle depuis « '+trame.name+' »', corps, [
+  if(reservees.length) corps.appendChild(el('p',{class:'note', text:'Balise(s) réservée(s) '+reservees.map(g=>'['+g+']').join(', ')+' : jamais saisies — numéro chrono automatique.'}));
+  corps.appendChild(el('p',{class:'note', text:'Champ vide = balise à compléter à la génération.'}));
+  openModal(modele?'Modifier le modèle « '+modele.nom+' »':'Nouveau modèle depuis « '+td.nom+' » ('+td.trigramme+')', corps, [
     {label:'Annuler', class:'btn'},
     {label: modele?'Enregistrer':'Créer le modèle', primary:true, onClick:()=>{
       const name=nomInput.value.trim()||'Modèle sans nom';
+      const tri=normalizeTrigramme(triInput.value);
+      if(!validateTrigramme(tri)){ alert('Trigramme invalide : 3 caractères A-Z/0-9 requis.'); return; }
+      if(state.modeles.some(m=>m.projetId===p.id && m.trigramme===tri && m.id!==(modele&&modele.id))){ alert('Trigramme '+tri+' déjà utilisé par un autre modèle de ce projet.'); return; }
       const values={}; for(const tag of aSaisir) values[tag]=champs[tag].value;
-      if(modele){ modele.name=name; modele.values=values; }
-      else state.modeles.push({ id:uid(), trameId:trame.id, name, values, createdAt:new Date().toISOString() });
+      if(modele){ modele.nom=name; modele.trigramme=tri; modele.values=values; }
+      else state.modeles.push({ id:uid(), projetId:p.id, typeDocId:td.id, nom:name, trigramme:tri, values, createdAt:new Date().toISOString() });
       renderAll();
     }}
   ]);
 }
-
-/* ---------- génération d'un document ---------- */
-function trameSourceDe(doc){
-  if(doc.sourceType==='modele'){
-    const mo=state.modeles.find(m=>m.id===doc.sourceId);
-    const tr=mo&&state.trames.find(t=>t.id===mo.trameId);
-    return tr?{ trame:tr, modele:mo }:null;
-  }
-  const tr=state.trames.find(t=>t.id===doc.sourceId);
-  return tr?{ trame:tr, modele:null }:null;
+function supprimerModele(mo){
+  if(!confirm('Supprimer le modèle « '+mo.nom+' » ('+mo.trigramme+') ?')) return;
+  state.modeles=state.modeles.filter(m=>m.id!==mo.id);
+  renderAll();
 }
-function ouvrirGeneration(trame, modele){
-  const tagTitre=trame.tags.find(t=>t.toLowerCase()==='titre');
+
+/* ============================================================
+   GENERATION D’UN DOCUMENT (avec prévisualisation live)
+   ============================================================ */
+function trameSourceDe(doc){
+  const td=state.trames.find(t=>t.id===doc.typeDocId || t.id===doc.sourceId);
+  const mo=doc.modeleId? state.modeles.find(m=>m.id===doc.modeleId) : (doc.sourceType==='modele'? state.modeles.find(m=>m.id===doc.sourceId):null);
+  return { td, modele: mo||null };
+}
+async function ouvrirGeneration(td, modele){
+  const p=projetActif();
+  const lines=await ensurePreview(td);
+  const tagTitre=td.tags.find(t=>t.toLowerCase()==='titre');
+  const hasChrono=td.tags.some(isReservedTag);
   const corps=el('div');
   const zoneMsg=el('div'); corps.appendChild(zoneMsg);
-  corps.appendChild(el('p',{class:'note', text:'Source : '+(modele?'modèle « '+modele.name+' » (trame « '+trame.name+' »)':'trame « '+trame.name+' »')+'. Préfixe : « '+(state.params.prefixe||'GD')+' » — prochain code : '+peekCode()+'.'}));
-  const hasChrono=trame.tags.some(isReservedTag);
-  if(hasChrono)
-    corps.appendChild(el('p',{class:'note', text:'La balise réservée [CHRONO] sera remplie automatiquement avec le prochain numéro chrono : '+peekChrono(state)+' (jamais saisie).'}));
+  const flex=el('div',{class:'gen-flex'});
+  const form=el('div',{class:'gen-form'});
+  flex.appendChild(form);
+  const pane=el('div',{class:'preview-pane'});
+  pane.appendChild(el('h4',{text:'👁 Prévisualisation'}));
+  const prevBody=el('div',{class:'preview-body'});
+  pane.appendChild(prevBody);
+  flex.appendChild(pane);
+  corps.appendChild(flex);
+
+  form.appendChild(el('p',{class:'note', text:'Projet « '+(p?p.nom:'—')+' » · type de document « '+td.nom+' » ('+td.trigramme+')'+(modele?' · modèle « '+modele.nom+' » ('+modele.trigramme+')':'')+' · prochain chrono : '+peekChrono(state)+'.'}));
+  if(hasChrono) form.appendChild(el('p',{class:'note', text:'[CHRONO] remplie automatiquement (jamais saisie).'}));
   const titreInput=el('input',{type:'text', value:(modele&&tagTitre&&modele.values[tagTitre])||''});
-  corps.appendChild(el('div',{class:'champ'}, el('label',{text:'Titre du document — équivalent de la balise ['+(tagTitre||'TITRE')+'] ; écrit dans la propriété « Titre » du fichier et dans son nom'}), titreInput));
+  form.appendChild(el('div',{class:'champ'}, el('label',{text:'Titre du document — équivalent de la balise ['+(tagTitre||'TITRE')+'] ; écrit dans la propriété « Titre » du fichier et dans son nom'}), titreInput));
   const champs={};
-  for(const tag of trame.tags){
+  for(const tag of td.tags){
     if(tag.toLowerCase()==='titre' || isReservedTag(tag)) continue;
     const inp=el('input',{type:'text', value: modele?(modele.values[tag]||''):''});
     champs[tag]=inp;
     const champ=el('div',{class:'champ'}, el('label',{text:'['+tag+']'}), inp);
-    const pl=plageText(tag, trame.slices);
-    if(pl) champ.appendChild(el('div',{class:'note', text:'Plages : '+pl+' → saisissez la valeur complète ('+minCharsText(trame,tag)+') ; seuls les caractères des plages seront insérés.'}));
-    corps.appendChild(champ);
+    const pl=plageText(tag, td.slices);
+    if(pl) champ.appendChild(el('div',{class:'note', text:'Plages : '+pl+' → valeur complète ('+minCharsText(td,tag)+').'}));
+    form.appendChild(champ);
   }
-  if(trame.tags.length) corps.appendChild(el('p',{class:'note', text:'Les balises laissées vides restent telles quelles dans le document généré.'}));
-  openModal('Générer un document', corps, [
+  form.appendChild(el('p',{class:'note', text:'Les balises laissées vides restent telles quelles dans le document.'}));
+
+  function currentValues(){
+    const values=new Map();
+    const titre=titreInput.value.trim();
+    for(const tag of td.tags){
+      if(isReservedTag(tag)) continue;
+      const v=(tag.toLowerCase()==='titre')?titre:(champs[tag]?champs[tag].value:'');
+      if(v!=='') values.set(tag.toLowerCase(), v);
+    }
+    return values;
+  }
+  function refreshPreview(){ fillPreview(prevBody, lines, currentValues(), 40); }
+  titreInput.addEventListener('input', refreshPreview);
+  for(const tag in champs) champs[tag].addEventListener('input', refreshPreview);
+  refreshPreview();
+
+  openModal('Générer un document — '+(modele? modele.nom+' ('+modele.trigramme+')' : td.nom+' ('+td.trigramme+')'), corps, [
     {label:'Annuler', class:'btn'},
     {label:'Générer et enregistrer', primary:true, onClick: async (close)=>{
       const titre=titreInput.value.trim();
       if(!titre){ message(zoneMsg,'err','Veuillez saisir le titre du document.'); titreInput.focus(); return; }
-      const values=new Map();
-      for(const tag of trame.tags){
-        if(isReservedTag(tag)) continue;
-        const v=(tag.toLowerCase()==='titre')?titre:(champs[tag]?champs[tag].value:'');
-        if(v!=='') values.set(tag.toLowerCase(), v);
-      }
-      let chronoVal=null;
-      if(hasChrono){ chronoVal=nextChrono(state); values.set('chrono', chronoVal); }
+      const values=currentValues();
+      const chronoVal=nextChrono(state);          // identifiant unique du document (et de la balise [CHRONO])
+      if(hasChrono) values.set('chrono', chronoVal);
       const warnings=[];
-      for(const tag of trame.tags){
+      for(const tag of td.tags){
         const v=values.get(tag.toLowerCase());
-        const mc=(trame.minChars&&trame.minChars[tag])||0;
+        const mc=(td.minChars&&td.minChars[tag])||0;
         if(v!=null && mc && String(v).length<mc)
-          warnings.push('['+tag+'] : '+String(v).length+' caractère(s) saisi(s) pour un minimum de '+mc+' (plages '+plageText(tag,trame.slices)+') — les caractères manquants seront vides');
+          warnings.push('['+tag+'] : '+String(v).length+' caractère(s) pour un minimum de '+mc+' (plages '+plageText(tag,td.slices)+') — caractères manquants vides');
       }
       if(warnings.length) message(zoneMsg,'warn','Attention — '+warnings.join(' ; '));
       try{
-        const bytes=await generateDocument(trame, values, titre);
-        const prefixe=state.params.prefixe||'GD';
-        const code=nextCode(state);
-        const fileName=docFileName(prefixe, code, titre, trame.kind);
-        state.documents.push({ code, prefixe, titre, fileName, chrono:chronoVal,
-          sourceType: modele?'modele':'trame', sourceId: modele?modele.id:trame.id,
-          sourceName: modele?modele.name:trame.name,
-          values:Object.fromEntries([...values].map(([k,v])=>[k,v])), date:new Date().toISOString() });
+        const bytes=await generateDocument(td, values, titre);
+        const tri= modele? modele.trigramme : td.trigramme;   // trigramme du modèle (remplace l’ancien préfixe), sinon celui du type de document
+        const fileName=fileNameForDoc(new Date(), p?p.nom:'Projet', tri, chronoVal, titre, td.kind);
+        state.documents.push({ code:chronoVal, chrono:chronoVal, date:new Date().toISOString(),
+          projetId:p?p.id:null, projetNom:p?p.nom:'', typeDocId:td.id, typeDocNom:td.nom, trigramme:tri,
+          modeleId:modele?modele.id:null, modeleNom:modele?modele.nom:'', titre, fileName,
+          sourceType: modele?'modele':'typedoc', sourceId: modele?modele.id:td.id, sourceName: modele?modele.nom:td.nom,
+          values:Object.fromEntries([...values].map(([k,v])=>[k,v])) });
         renderAll();
-        const res=await saveBytes(bytes, fileName, MIMES[trame.kind]);
-        if(res) message($('#msgTrames'),'ok', res+' — code unique : '+code+(chronoVal?' — chrono : '+chronoVal:'')+'.');
+        const res=await saveBytes(bytes, fileName, MIMES[td.kind]);
+        if(res) message($('#msg'),'ok', res+' — chrono : '+chronoVal+'.');
         close();
       }catch(e){ message(zoneMsg,'err','Génération impossible : '+e.message); }
     }}
-  ]);
+  ], true);
 }
 async function retelechargerDocument(doc){
   const src=trameSourceDe(doc);
-  if(!src){ message($('#msgTrames'),'err','Trame source introuvable pour '+doc.fileName); return; }
+  if(!src.td){ message($('#msg'),'err','Type de document source introuvable pour '+doc.fileName); return; }
   try{
     const values=new Map(Object.entries(doc.values||{}).map(([k,v])=>[k.toLowerCase(),v]));
-    const bytes=await generateDocument(src.trame, values, doc.titre);
-    await saveBytes(bytes, doc.fileName, MIMES[src.trame.kind]);
-  }catch(e){ message($('#msgTrames'),'err','Retéléchargement impossible : '+e.message); }
+    const bytes=await generateDocument(src.td, values, doc.titre);
+    await saveBytes(bytes, doc.fileName, MIMES[src.td.kind]);
+  }catch(e){ message($('#msg'),'err','Retéléchargement impossible : '+e.message); }
 }
-
-function exporterRegistre(){ return saveBytes(buildRegister(state), 'registre-gestion-documentaire.xlsx', MIMES.xlsx); }
-function exporterDoc(){ return saveBytes(enc(DOC_MD), 'documentation-gestion-documentaire.md', 'text/markdown'); }
-function apropos(){
+/* lire les valeurs saisies dans chaque balise d’un document */
+function voirValeurs(d){
+  const td=state.trames.find(t=>t.id===d.typeDocId);
+  const tags= td? td.tags : Object.keys(d.values||{});
   const corps=el('div');
-  corps.appendChild(el('p',{text:'Gestion Documentaire — version '+APP_VERSION}));
-  corps.appendChild(el('p',{class:'note',text:'Application monopage 100 % locale : un seul fichier index.html, aucun accès réseau, uniquement des fichiers sur le disque.'}));
-  corps.appendChild(el('p',{text:state.trames.length+' trame(s) · '+state.modeles.length+' modèle(s) · '+state.documents.length+' document(s) · préfixe « '+(state.params.prefixe||'GD')+' » · prochain code '+peekCode()}));
-  openModal('À propos de Gestion Documentaire', corps, [{label:'Fermer', class:'btn primary'}]);
+  corps.appendChild(el('p',{class:'note', text:'Document « '+d.fileName+' » — chrono '+ (d.chrono||d.code) +(d.trigramme?' · trigramme '+d.trigramme:'')+'.'}));
+  const t=el('table',{class:'grid'});
+  t.appendChild(el('thead',{}, el('tr',{}, el('th',{text:'Balise'}), el('th',{text:'Valeur saisie'}))));
+  const tb=el('tbody');
+  for(const g of tags){
+    const v=(d.values||{})[g.toLowerCase()];
+    const row=el('tr');
+    row.appendChild(el('td',{}, el('span',{class:'balise', text:'['+g+']'})));
+    row.appendChild(el('td',{text: v!=null&&v!==''? v : '—'}));
+    tb.appendChild(row);
+  }
+  t.appendChild(tb);
+  corps.appendChild(t);
+  openModal('Valeurs des balises — '+d.titre, corps, [{label:'Fermer', class:'btn'}]);
 }
 
 /* ============================================================
-   PAGE PARAMÈTRES (chemins réseau du dossier des trames et du
-   registre Excel + sélection des emplacements réels)
+   PARAMETRES (projets + persistance + divers)
    ============================================================ */
 function buildParametres(){
   const c=$('#page-parametres');
@@ -1118,12 +1332,30 @@ function buildParametres(){
   c.innerHTML='';
   c.appendChild(el('h2',{class:'page-title', text:'Paramètres'}));
 
+  const c0=el('div',{class:'carte'});
+  c0.appendChild(el('h2',{text:'Projets (niveau hiérarchique du haut)'}));
+  c0.appendChild(el('p',{class:'note', text:'Les types de document et les modèles appartiennent au projet actif (sélecteur dans le bandeau).'}));
+  const r0=el('div',{class:'form-row'});
+  const nomP=el('input',{type:'text', id:'nomNouveauProjet', placeholder:'Nom du nouveau projet', style:'width:220px'});
+  const bNew=el('button',{class:'btn primary', text:'Créer un projet'});
+  bNew.addEventListener('click',()=>{
+    const n=nomP.value.trim(); if(!n) return;
+    if(state.projets.some(p=>p.nom.toLowerCase()===n.toLowerCase())){ message($('#msg'),'warn','Ce nom existe déjà.'); return; }
+    const p={ id:uid(), nom:n, createdAt:new Date().toISOString() };
+    state.projets.push(p); state.projetActif=p.id; nomP.value='';
+    renderAll();
+  });
+  r0.appendChild(nomP); r0.appendChild(bNew);
+  c0.appendChild(r0);
+  c0.appendChild(el('div',{id:'listeProjets'}));
+  c.appendChild(c0);
+
   const c1=el('div',{class:'carte'});
   c1.appendChild(el('h2',{text:'Dossier des trames (persistance automatique)'}));
-  c1.appendChild(el('p',{class:'note', text:'Chaque trame importée ou mise à jour est copiée dans ce dossier, et les trames de ce dossier sont rechargées automatiquement à chaque ouverture de l\'application. Le chemin réseau est un paramètre (champ ci-dessous) ; « Parcourir… » associe le dossier réel (navigateur compatible requis : Chrome/Edge).'}));
+  c1.appendChild(el('p',{class:'note', text:'Chaque type de document est copié dans ce dossier (son fichier trame) et rechargé automatiquement à l’ouverture. Le chemin réseau est un paramètre ; « Parcourir… » associe le dossier réel (Chrome/Edge).'}));
   const r1=el('div',{class:'form-row'});
   r1.appendChild(el('label',{for:'pathDossier', text:'Chemin du dossier des trames :'}));
-  const pathDossier=el('input',{type:'text', id:'pathDossier', placeholder:'ex. \\\\serveur\\partage\\trames', value: state.params.dossierTrames||''});
+  const pathDossier=el('input',{type:'text', id:'pathDossier', placeholder:'ex. \\\\serveur\\partage\\trames', value: state.params.dossierTrames||'', style:'flex:1;min-width:240px'});
   pathDossier.addEventListener('input',()=>{ state.params.dossierTrames=pathDossier.value.trim(); persisterAuto(); updateTopStatus(); });
   const btnChoisirDossier=el('button',{class:'btn', text:'Parcourir…'});
   btnChoisirDossier.addEventListener('click', choisirDossierTrames);
@@ -1136,10 +1368,10 @@ function buildParametres(){
 
   const c2=el('div',{class:'carte'});
   c2.appendChild(el('h2',{text:'Registre Excel (persistance automatique)'}));
-  c2.appendChild(el('p',{class:'note', text:'Le registre (trames, modèles, documents générés, paramètres, compteurs) est enregistré automatiquement dans ce fichier Excel à chaque modification, et rechargé à l\'ouverture.'}));
+  c2.appendChild(el('p',{class:'note', text:'Le registre (projets, types de document, modèles, documents, paramètres, compteur chrono, chemins) — avec une table par type de document — est réenregistré automatiquement dans ce fichier à chaque modification et rechargé à l’ouverture.'}));
   const r2=el('div',{class:'form-row'});
   r2.appendChild(el('label',{for:'pathRegistre', text:'Chemin du registre Excel :'}));
-  const pathRegistre=el('input',{type:'text', id:'pathRegistre', placeholder:'ex. \\\\serveur\\partage\\registre-gestion-documentaire.xlsx', value: state.params.registreExcel||''});
+  const pathRegistre=el('input',{type:'text', id:'pathRegistre', placeholder:'ex. \\\\serveur\\partage\\registre-gestion-documentaire.xlsx', value: state.params.registreExcel||'', style:'flex:1;min-width:240px'});
   pathRegistre.addEventListener('input',()=>{ state.params.registreExcel=pathRegistre.value.trim(); persisterAuto(); updateTopStatus(); });
   const btnChoisirRegistre=el('button',{class:'btn', text:'Parcourir…'});
   btnChoisirRegistre.addEventListener('click', choisirRegistre);
@@ -1148,7 +1380,7 @@ function buildParametres(){
   const btnSave=el('button',{class:'btn primary', text:'Enregistrer maintenant'});
   btnSave.addEventListener('click', async ()=>{
     const ok=await saveRegistreAuto();
-    message($('#msgTrames'), ok?'ok':'warn', ok?'Registre enregistré dans le fichier configuré.':'Aucun fichier registre configuré — utilisez « Parcourir… ».');
+    message($('#msg'), ok?'ok':'warn', ok?'Registre enregistré dans le fichier configuré.':'Aucun fichier registre configuré — utilisez « Parcourir… ».');
   });
   r2.appendChild(pathRegistre); r2.appendChild(btnChoisirRegistre); r2.appendChild(btnCharger); r2.appendChild(btnSave);
   c2.appendChild(r2);
@@ -1164,56 +1396,81 @@ function buildParametres(){
   const bAp=el('button',{class:'btn', text:'À propos'}); bAp.addEventListener('click',apropos);
   r3.appendChild(bExp); r3.appendChild(bImp); r3.appendChild(bDoc); r3.appendChild(bAp);
   c3.appendChild(r3);
-  c3.appendChild(el('p',{class:'note', text:'Le préfixe des documents se règle dans la barre d\'état (en bas à droite). La persistance automatique repose sur l\'API File System Access : les handles choisis sont conservés localement (IndexedDB) entre deux ouvertures, après validation de l\'accès par le navigateur.'}));
+  c3.appendChild(el('p',{class:'note', text:'La persistance automatique repose sur l\'API File System Access : les handles choisis sont conservés localement (IndexedDB), l\'accès est revalidé à chaque ouverture.'}));
   c.appendChild(c3);
   updateParamStatus();
 }
+function updateListeProjets(){
+  const c=$('#listeProjets'); if(!c) return;
+  c.innerHTML='';
+  if(!state.projets.length){ c.appendChild(el('p',{class:'note', text:'Aucun projet — créez-en un ci-dessus ou avec le bouton ＋ du bandeau.'})); return; }
+  const t=el('table',{class:'grid'});
+  t.appendChild(el('thead',{}, el('tr',{}, ...['Projet','Actif','Créé le','Actions'].map(h=>el('th',{text:h})))));
+  const tb=el('tbody');
+  for(const p of state.projets){
+    const row=el('tr');
+    row.appendChild(el('td',{text:p.nom}));
+    row.appendChild(el('td',{text: state.projetActif===p.id? '✔' : ''}));
+    row.appendChild(el('td',{text:fmtDate(p.createdAt)}));
+    const act=el('div',{class:'btnrow'});
+    const bAct=el('button',{class:'btn small', text:'Activer'});
+    bAct.disabled = state.projetActif===p.id;
+    bAct.addEventListener('click',()=>{ state.projetActif=p.id; renderAll(); });
+    const bDel=el('button',{class:'btn small danger', text:'Supprimer'});
+    bDel.addEventListener('click',()=>supprimerProjet(p));
+    act.appendChild(bAct); act.appendChild(bDel);
+    row.appendChild(el('td',{}, act));
+    tb.appendChild(row);
+  }
+  t.appendChild(tb);
+  c.appendChild(t);
+}
 async function choisirDossierTrames(){
-  if(!window.showDirectoryPicker){ message($('#msgTrames'),'err','Sélection de dossier non disponible dans ce navigateur (Chrome/Edge requis). Renseignez au moins le chemin réseau à la main.'); return; }
+  if(!window.showDirectoryPicker){ message($('#msg'),'err','Sélection de dossier indisponible (Chrome/Edge requis). Renseignez au moins le chemin réseau.'); return; }
   try{
     const dir=await window.showDirectoryPicker();
     state.handles.dossierTrames=dir;
     if(!state.params.dossierTrames) state.params.dossierTrames=dir.name;
     await idbSet('handles', state.handles);
     let ecrites=0;
-    for(const tr of state.trames) if(await ecrireTrameDansDossier(tr)) ecrites++;
+    for(const td of state.trames) if(await ecrireTDDansDossier(td)) ecrites++;
     const n=await chargerTramesDepuisDossier(dir);
     const pd=$('#pathDossier'); if(pd) pd.value=state.params.dossierTrames;
     updateParamStatus(); renderAll(); persisterAuto();
-    message($('#msgTrames'),'ok','Dossier des trames connecté : « '+dir.name+' » — '+ecrites+' trame(s) écrite(s) dans le dossier, '+n+' trame(s) lue(s) en plus.');
-  }catch(e){ if(e&&e.name==='AbortError') return; message($('#msgTrames'),'err','Connexion au dossier impossible : '+e.message); }
+    message($('#msg'),'ok','Dossier des trames connecté : « '+dir.name+' » — '+ecrites+' fichier(s) écrit(s), '+n+' type(s) de document lu(s) en plus.');
+  }catch(e){ if(e&&e.name==='AbortError') return; message($('#msg'),'err','Connexion au dossier impossible : '+e.message); }
 }
 async function rechargerDossier(){
   const dir=state.handles.dossierTrames;
-  if(!dir){ message($('#msgTrames'),'warn','Aucun dossier connecté — utilisez « Parcourir… ».'); return; }
+  if(!dir){ message($('#msg'),'warn','Aucun dossier connecté — « Parcourir… ».'); return; }
   try{
     const n=await chargerTramesDepuisDossier(dir);
     renderAll(); persisterAuto();
-    message($('#msgTrames'),'ok', n? n+' nouvelle(s) trame(s) chargée(s) depuis le dossier.' : 'Aucune nouvelle trame dans le dossier.');
-  }catch(e){ message($('#msgTrames'),'err','Rechargement impossible : '+e.message); }
+    message($('#msg'),'ok', n? n+' nouveau(x) type(s) de document chargé(s).' : 'Aucun nouveau fichier dans le dossier.');
+  }catch(e){ message($('#msg'),'err','Rechargement impossible : '+e.message); }
 }
 async function choisirRegistre(){
-  if(!window.showSaveFilePicker){ message($('#msgTrames'),'err','Sélection de fichier non disponible dans ce navigateur (Chrome/Edge requis). Renseignez au moins le chemin réseau à la main.'); return; }
+  if(!window.showSaveFilePicker){ message($('#msg'),'err','Sélection de fichier indisponible (Chrome/Edge requis). Renseignez au moins le chemin réseau.'); return; }
   try{
     const fh=await window.showSaveFilePicker({ suggestedName:'registre-gestion-documentaire.xlsx',
       types:[{ description:'Registre Excel', accept:{ [MIMES.xlsx]:['.xlsx'] } }] });
     state.handles.registreExcel=fh;
     if(!state.params.registreExcel) state.params.registreExcel=fh.name;
     await idbSet('handles', state.handles);
-    await saveRegistreAuto(); // crée/écrase le fichier avec l'état courant
+    await saveRegistreAuto();
     const pr=$('#pathRegistre'); if(pr) pr.value=state.params.registreExcel;
     updateParamStatus(); renderAll(); persisterAuto();
-    message($('#msgTrames'),'ok','Registre Excel connecté : « '+fh.name+' » — enregistré automatiquement à chaque modification.');
-  }catch(e){ if(e&&e.name==='AbortError') return; message($('#msgTrames'),'err','Connexion au registre impossible : '+e.message); }
+    message($('#msg'),'ok','Registre Excel connecté : « '+fh.name+' » — enregistré automatiquement à chaque modification.');
+  }catch(e){ if(e&&e.name==='AbortError') return; message($('#msg'),'err','Connexion au registre impossible : '+e.message); }
 }
 async function chargerRegistreMaintenant(){
   const h=state.handles.registreExcel;
-  if(!h){ message($('#msgTrames'),'warn','Aucun fichier registre connecté — utilisez « Parcourir… ».'); return; }
+  if(!h){ message($('#msg'),'warn','Aucun fichier registre connecté — « Parcourir… ».'); return; }
   try{
     await chargerRegistreDepuisHandle(h);
     renderAll();
-    message($('#msgTrames'),'ok','Registre rechargé : '+state.trames.length+' trame(s), '+state.modeles.length+' modèle(s), '+state.documents.length+' document(s).');
-  }catch(e){ message($('#msgTrames'),'err','Chargement du registre impossible : '+e.message); }
+    message($('#msg'),'ok','Registre rechargé : '+state.projets.length+' projet(s), '+state.trames.length+' type(s) de document, '+state.modeles.length+' modèle(s), '+state.documents.length+' document(s).');
+  }catch(e){ message($('#msg'),'err','Chargement impossible : '+e.message); }
 }
 function updateParamStatus(){
   const sd=$('#statutDossier');
@@ -1231,101 +1488,132 @@ function updateParamStatus(){
   updateTopStatus();
 }
 function updateTopStatus(){
-  const parts=[];
-  if(state.params.dossierTrames) parts.push('Trames : '+state.params.dossierTrames);
-  if(state.params.registreExcel) parts.push('Registre : '+state.params.registreExcel);
-  const ts=$('#topStatus'); if(ts) ts.textContent=parts.join('  ·  ');
   const sp=$('#statusPersist');
   if(sp) sp.textContent=(state.handles.dossierTrames?'● dossier trames':'○ dossier trames')+' · '+(state.handles.registreExcel?'● registre Excel':'○ registre Excel');
 }
+function exporterRegistre(){ return saveBytes(buildRegister(state), 'registre-gestion-documentaire.xlsx', MIMES.xlsx); }
+function exporterDoc(){ return saveBytes(enc(DOC_MD), 'documentation-gestion-documentaire.md', 'text/markdown'); }
+function apropos(){
+  const corps=el('div');
+  const p=projetActif();
+  corps.appendChild(el('p',{text:'Gestion Documentaire — version '+APP_VERSION}));
+  corps.appendChild(el('p',{class:'note',text:'Application monopage 100 % locale : un seul fichier index.html, aucun accès réseau, uniquement des fichiers sur le disque.'}));
+  corps.appendChild(el('p',{text:'Projet actif : '+(p?p.nom:'—')+' · '+state.trames.length+' type(s) de document · '+state.modeles.length+' modèle(s) · '+state.documents.length+' document(s) · prochain chrono '+peekChrono(state)}));
+  openModal('À propos de Gestion Documentaire', corps, [{label:'Fermer', class:'btn primary'}]);
+}
 
 /* ============================================================
-   NAVIGATION PAR PAGES
+   NAVIGATION + AFFICHAGE
    ============================================================ */
 function selectPage(id){
   ui.page=id;
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active', b.dataset.page===id));
   document.querySelectorAll('section.page').forEach(s=>s.classList.toggle('active', s.id==='page-'+id));
 }
-
-/* ============================================================
-   AFFICHAGE
-   ============================================================ */
 function renderAll(){
-  renderAccueil(); renderTrames(); renderModeles(); renderDocuments(); renderRegistre(); renderBandeau();
-  updateStatusbar(); updateParamStatus();
+  renderBand(); renderAccueil(); renderTD(); renderModeles(); renderDocuments(); renderRegistre(); renderBandeau();
+  updateListeProjets(); updateStatusbar(); updateParamStatus();
   persisterAuto();
 }
+function renderBand(){
+  const sel=$('#selProjet'); if(!sel) return;
+  const cur=sel.value;
+  sel.innerHTML='';
+  for(const p of state.projets) sel.appendChild(el('option',{value:p.id, text:p.nom}));
+  if(state.projetActif && state.projets.some(p=>p.id===state.projetActif)) sel.value=state.projetActif;
+  else if(cur && state.projets.some(p=>p.id===cur)) sel.value=cur;
+  else if(state.projets.length) sel.value=state.projets[0].id;
+}
 function updateStatusbar(){
-  $('#statusLeft').textContent=state.trames.length+' trame(s) · '+state.modeles.length+' modèle(s) · '+state.documents.length+' document(s)';
-  $('#statusCode').textContent='Prochain code : '+peekCode()+' · chrono : '+peekChrono(state);
+  const p=projetActif();
+  const tds=state.trames.filter(t=>p&&t.projetId===p.id).length;
+  const mos=state.modeles.filter(m=>p&&m.projetId===p.id).length;
+  $('#statusLeft').textContent='Projet « '+(p?p.nom:'—')+' » : '+tds+' type(s) de document · '+mos+' modèle(s) · '+state.documents.length+' document(s)';
+  $('#statusChrono').textContent='Prochain chrono : '+peekChrono(state);
   updateTopStatus();
 }
 
-/* page principale : grille de cartes modèles + trames */
 function renderAccueil(){
   const c=$('#page-accueil'); c.innerHTML='';
-  c.appendChild(el('h2',{class:'page-title', text:'Créer un nouveau document'}));
-  c.appendChild(el('p',{class:'note', text:'Cliquez sur une carte pour générer un document (depuis le modèle, ou en complétant les balises restantes de la trame). Les trames et les modèles se gèrent dans leurs pages dédiées (menu du haut).'}));
-  c.appendChild(el('h3',{class:'grid-title', text:'Modèles ('+state.modeles.length+')'}));
-  if(state.modeles.length){
+  const p=projetActif();
+  c.appendChild(el('h2',{class:'page-title', text:'Créer un nouveau document'+(p?' — projet « '+p.nom+' »':'')}));
+  if(!p){
+    c.appendChild(el('p',{class:'note', text:'Aucun projet : créez-en un avec le bouton ＋ du bandeau (en haut), puis ajoutez des types de document et des modèles.'}));
+    const b=el('button',{class:'btn primary', text:'＋ Créer un projet'});
+    b.addEventListener('click', nouveauProjet);
+    c.appendChild(b);
+    return;
+  }
+  c.appendChild(el('p',{class:'note', text:'Cliquez sur une carte (avec sa prévisualisation) pour générer un document. Les types de document et modèles se gèrent dans leurs pages dédiées.'}));
+  const tds=state.trames.filter(t=>t.projetId===p.id);
+  const mos=state.modeles.filter(m=>m.projetId===p.id);
+  c.appendChild(el('h3',{class:'grid-title', text:'📋 Modèles ('+mos.length+')'}));
+  if(mos.length){
     const g=el('div',{class:'cards'});
-    for(const mo of state.modeles){
-      const tr=trameDeModele(mo);
+    for(const mo of mos){
+      const td=tdOfModele(mo);
       const card=el('div',{class:'card modele'});
-      card.appendChild(el('div',{class:'card-icon', text:'📋'}));
-      card.appendChild(el('div',{class:'card-name', text:mo.name}));
-      card.appendChild(el('div',{class:'card-sub', text: tr? 'trame : '+tr.name : '⚠ trame supprimée'}));
+      const head=el('div',{class:'card-head'});
+      head.appendChild(el('span',{class:'card-icon', text:'📋'}));
+      head.appendChild(el('span',{class:'card-name', text:mo.nom}));
+      head.appendChild(el('span',{class:'tri', text:mo.trigramme}));
+      card.appendChild(head);
+      card.appendChild(el('div',{class:'card-sub', text: td? 'type de document : '+td.nom+' ('+td.trigramme+')' : '⚠ type de document supprimé'}));
       const nbFix=Object.values(mo.values||{}).filter(v=>v!==''&&v!=null).length;
-      card.appendChild(el('div',{class:'card-sub', text: nbFix+' valeur(s) fixée(s)'}));
+      card.appendChild(el('div',{class:'card-sub', text: nbFix+' valeur(s) fixée(s) sur '+(td?td.tags.length:0)+' balise(s)'}));
       card.appendChild(el('div',{class:'card-cta', text:'Générer un document ▶'}));
-      card.addEventListener('click',()=>{ if(tr) ouvrirGeneration(tr,mo); else message($('#msgTrames'),'warn','La trame de ce modèle est introuvable.'); });
+      card.addEventListener('click',()=>{ if(td) ouvrirGeneration(td,mo); else message($('#msg'),'warn','Type de document du modèle introuvable.'); });
       g.appendChild(card);
     }
     c.appendChild(g);
-  } else c.appendChild(el('p',{class:'note', text:'Aucun modèle pour le moment — créez-en un depuis la page Modèles (ou Trames).'}));
+  } else c.appendChild(el('p',{class:'note', text:'Aucun modèle — créez-en un dans la page Modèles.'}));
 
-  c.appendChild(el('h3',{class:'grid-title', text:'Trames ('+state.trames.length+')'}));
-  if(state.trames.length){
+  c.appendChild(el('h3',{class:'grid-title', text:'📄 Types de document ('+tds.length+')'}));
+  if(tds.length){
     const icons={docx:'📄', xlsx:'📊', pptx:'📈'};
     const g=el('div',{class:'cards'});
-    for(const tr of state.trames){
-      const card=el('div',{class:'card t-'+tr.kind});
-      card.appendChild(el('div',{class:'card-icon', text:icons[tr.kind]||'📄'}));
-      card.appendChild(el('div',{class:'card-name', text:tr.name}));
-      card.appendChild(el('div',{class:'card-sub', text:tr.kind.toUpperCase()+' — '+tr.tags.length+' balise(s)'}));
+    for(const td of tds){
+      const card=el('div',{class:'card t-'+td.kind});
+      const head=el('div',{class:'card-head'});
+      head.appendChild(el('span',{class:'card-icon', text:icons[td.kind]||'📄'}));
+      head.appendChild(el('span',{class:'card-name', text:td.nom}));
+      head.appendChild(el('span',{class:'tri', text:td.trigramme}));
+      card.appendChild(head);
+      card.appendChild(el('div',{class:'card-sub', text:td.name+' · '+td.kind.toUpperCase()+' · '+td.tags.length+' balise(s)'}));
       const tags=el('div',{class:'card-tags'});
-      for(const g2 of tr.tags.slice(0,8)){
+      for(const g2 of td.tags.slice(0,6)){
         const chip=el('span',{class:'balise', text:'['+g2+']'});
-        const pl=plageText(g2, tr.slices);
-        if(pl) chip.title='plages '+pl+' ('+minCharsText(tr,g2)+')';
-        if(isReservedTag(g2)) chip.title='réservée : numéro chrono automatique';
+        const pl=plageText(g2, td.slices);
+        if(pl) chip.title='plages '+pl+' ('+minCharsText(td,g2)+')';
+        if(isReservedTag(g2)) chip.title='réservée : chrono auto';
         tags.appendChild(chip);
       }
-      if(tr.tags.length>8) tags.appendChild(el('span',{class:'note', text:'+'+(tr.tags.length-8)+'…'}));
+      if(td.tags.length>6) tags.appendChild(el('span',{class:'note', text:'+'+(td.tags.length-6)+'…'}));
       card.appendChild(tags);
+      const prev=el('div',{class:'card-preview'});
+      card.appendChild(prev);
+      ensurePreview(td).then(lines=>{ if(prev.isConnected) fillPreview(prev, lines, null, 4); });
       card.appendChild(el('div',{class:'card-cta', text:'Générer un document ▶'}));
-      card.addEventListener('click',()=>ouvrirGeneration(tr,null));
+      card.addEventListener('click',()=>ouvrirGeneration(td,null));
       g.appendChild(card);
     }
     c.appendChild(g);
   } else {
-    const p=el('p',{class:'note', text:'Aucune trame importée — allez dans la page '});
-    const b=el('button',{class:'link', text:'Trames'});
-    b.addEventListener('click',()=>selectPage('trames'));
-    p.appendChild(b);
-    p.appendChild(document.createTextNode(' pour en importer.'));
-    c.appendChild(p);
+    const p2=el('p',{class:'note', text:'Aucun type de document — allez dans la page '});
+    const b=el('button',{class:'link', text:'Types de document'});
+    b.addEventListener('click',()=>selectPage('typedoc'));
+    p2.appendChild(b); p2.appendChild(document.createTextNode(' pour en créer (nom + trigramme + fichier trame).'));
+    c.appendChild(p2);
   }
 }
 
-function chipsBalises(tr){
+function chipsBalises(td){
   const span=el('span');
-  if(tr.tags.length) for(const g of tr.tags){
+  if(td.tags.length) for(const g of td.tags){
     const chip=el('span',{class:'balise', text:'['+g+']'});
     const infos=[];
-    const pl=plageText(g, tr.slices);
-    if(pl) infos.push('plages '+pl+' ('+minCharsText(tr,g)+')');
+    const pl=plageText(g, td.slices);
+    if(pl) infos.push('plages '+pl+' ('+minCharsText(td,g)+')');
     if(isReservedTag(g)) infos.push('réservée : chrono auto');
     if(infos.length) chip.title=infos.join(' | ');
     span.appendChild(chip);
@@ -1334,26 +1622,30 @@ function chipsBalises(tr){
   return span;
 }
 
-function renderTrames(){
-  const c=$('#listeTrames');
-  if(!state.trames.length){ c.innerHTML='<div class="vide">Aucune trame — importez des fichiers .docx/.xlsx/.pptx ci-dessus.</div>'; return; }
+function renderTD(){
+  const p=projetActif();
+  const c=$('#listeTD');
+  const tds=state.trames.filter(t=>p&&t.projetId===p.id);
+  if(!tds.length){ c.innerHTML='<div class="vide">Aucun type de document dans ce projet — créez-en un ci-dessus (nom + trigramme + fichier).</div>'; return; }
   const t=el('table',{class:'grid'});
-  t.appendChild(el('thead',{}, el('tr',{}, ...['Nom','Type','Balises détectées','Dates','Actions'].map(h=>el('th',{text:h})))));
+  t.appendChild(el('thead',{}, el('tr',{}, ...['Nom','Trigramme','Fichier','Format','Balises','Dates','Actions'].map(h=>el('th',{text:h})))));
   const tb=el('tbody');
-  for(const tr of state.trames){
+  for(const td of tds){
     const row=el('tr');
     const dates=el('div');
-    dates.appendChild(el('div',{class:'note', text:'import : '+fmtDate(tr.importedAt)}));
-    if(tr.updatedAt) dates.appendChild(el('div',{class:'note', text:'maj : '+fmtDate(tr.updatedAt)}));
+    dates.appendChild(el('div',{class:'note', text:'import : '+fmtDate(td.importedAt)}));
+    if(td.updatedAt) dates.appendChild(el('div',{class:'note', text:'maj : '+fmtDate(td.updatedAt)}));
     const act=el('div',{class:'btnrow'});
-    act.appendChild(el('button',{class:'btn small', text:'Balises', onclick:()=>voirBalises(tr)}));
-    act.appendChild(el('button',{class:'btn small', text:'Mettre à jour', onclick:()=>demanderMiseAJourTrame(tr)}));
-    act.appendChild(el('button',{class:'btn small', text:'Créer un modèle', onclick:()=>ouvrirModaleModele(tr,null)}));
-    act.appendChild(el('button',{class:'btn small primary', text:'Générer ▶', onclick:()=>ouvrirGeneration(tr,null)}));
-    act.appendChild(el('button',{class:'btn small danger', text:'Supprimer', onclick:()=>supprimerTrame(tr)}));
-    row.appendChild(el('td',{text:tr.name}));
-    row.appendChild(el('td',{text:tr.kind.toUpperCase()}));
-    row.appendChild(el('td',{}, chipsBalises(tr)));
+    act.appendChild(el('button',{class:'btn small', text:'👁 Balises', onclick:()=>voirBalises(td)}));
+    act.appendChild(el('button',{class:'btn small', text:'Mettre à jour', onclick:()=>demanderMiseAJourTD(td)}));
+    act.appendChild(el('button',{class:'btn small', text:'Créer un modèle', onclick:()=>ouvrirModaleModele(td,null)}));
+    act.appendChild(el('button',{class:'btn small primary', text:'Générer ▶', onclick:()=>ouvrirGeneration(td,null)}));
+    act.appendChild(el('button',{class:'btn small danger', text:'Supprimer', onclick:()=>supprimerTD(td)}));
+    row.appendChild(el('td',{text:td.nom}));
+    row.appendChild(el('td',{}, el('span',{class:'tri', text:td.trigramme})));
+    row.appendChild(el('td',{text:td.name}));
+    row.appendChild(el('td',{text:td.kind.toUpperCase()}));
+    row.appendChild(el('td',{}, chipsBalises(td)));
     row.appendChild(el('td',{}, dates));
     row.appendChild(el('td',{}, act));
     tb.appendChild(row);
@@ -1363,31 +1655,36 @@ function renderTrames(){
 }
 
 function renderModeles(){
-  const sel=$('#selTrameModele');
-  if(sel && state.trames.length){
+  const p=projetActif();
+  const sel=$('#moTD');
+  const tds=state.trames.filter(t=>p&&t.projetId===p.id);
+  if(sel){
     const cur=sel.value;
     sel.innerHTML='';
-    for(const tr of state.trames) sel.appendChild(el('option',{value:tr.id, text:tr.name}));
-    if(cur && state.trames.some(t=>t.id===cur)) sel.value=cur; else sel.value=state.trames[0].id;
+    for(const td of tds) sel.appendChild(el('option',{value:td.id, text:td.nom+' ('+td.trigramme+')'}));
+    if(cur && tds.some(t=>t.id===cur)) sel.value=cur;
+    else if(tds.length) sel.value=tds[0].id;
   }
   const c=$('#listeModeles');
-  if(!state.modeles.length){ c.innerHTML='<div class="vide">Aucun modèle — créez-en un ci-dessus depuis une trame.</div>'; return; }
+  const mos=state.modeles.filter(m=>p&&m.projetId===p.id);
+  if(!mos.length){ c.innerHTML='<div class="vide">Aucun modèle dans ce projet — créez-en un ci-dessus depuis un type de document.</div>'; return; }
   const t=el('table',{class:'grid'});
-  t.appendChild(el('thead',{}, el('tr',{}, ...['Nom','Trame','Valeurs renseignées','Créé le','Actions'].map(h=>el('th',{text:h})))));
+  t.appendChild(el('thead',{}, el('tr',{}, ...['Nom','Trigramme','Type de document','Valeurs renseignées','Créé le','Actions'].map(h=>el('th',{text:h})))));
   const tb=el('tbody');
-  for(const mo of state.modeles){
-    const tr=state.trames.find(x=>x.id===mo.trameId);
+  for(const mo of mos){
+    const td=tdOfModele(mo);
     const row=el('tr');
     const vals=el('span');
     const remplies=Object.entries(mo.values).filter(([,v])=>v!==''&&v!=null);
     if(remplies.length) for(const [k,v] of remplies) vals.appendChild(el('div',{}, el('span',{class:'balise',text:'['+k+']'}), ' = '+v));
     else vals.appendChild(el('span',{class:'note', text:'(aucune valeur fixe — balises demandées à la génération)'}));
     const act=el('div',{class:'btnrow'});
-    act.appendChild(el('button',{class:'btn small', text:'Modifier', onclick:()=>{ if(tr) ouvrirModaleModele(tr,mo); }}));
-    act.appendChild(el('button',{class:'btn small primary', text:'Générer ▶', onclick:()=>{ if(tr) ouvrirGeneration(tr,mo); }}));
+    act.appendChild(el('button',{class:'btn small', text:'Modifier', onclick:()=>{ if(td) ouvrirModaleModele(td,mo); }}));
+    act.appendChild(el('button',{class:'btn small primary', text:'Générer ▶', onclick:()=>{ if(td) ouvrirGeneration(td,mo); }}));
     act.appendChild(el('button',{class:'btn small danger', text:'Supprimer', onclick:()=>supprimerModele(mo)}));
-    row.appendChild(el('td',{text:mo.name}));
-    row.appendChild(el('td',{text: tr?tr.name:'(trame supprimée)'}));
+    row.appendChild(el('td',{text:mo.nom}));
+    row.appendChild(el('td',{}, el('span',{class:'tri', text:mo.trigramme})));
+    row.appendChild(el('td',{text: td? td.nom+' ('+td.trigramme+')' : '(type supprimé)'}));
     row.appendChild(el('td',{}, vals));
     row.appendChild(el('td',{text:fmtDate(mo.createdAt)}));
     row.appendChild(el('td',{}, act));
@@ -1399,21 +1696,23 @@ function renderModeles(){
 
 function renderDocuments(){
   const c=$('#listeDocuments');
-  if(!state.documents.length){ c.innerHTML='<div class="vide">Aucun document généré pour le moment — créez-en un depuis la page principale.</div>'; return; }
+  if(!state.documents.length){ c.innerHTML='<div class="vide">Aucun document généré — créez-en un depuis la page principale.</div>'; return; }
   const t=el('table',{class:'grid'});
-  t.appendChild(el('thead',{}, el('tr',{}, ...['Code','Nom du fichier','Titre','Source','Chrono','Généré le','Actions'].map(h=>el('th',{text:h})))));
+  t.appendChild(el('thead',{}, el('tr',{}, ...['Chrono','Date','Projet','Type de document','Modèle','Titre','Fichier','Actions'].map(h=>el('th',{text:h})))));
   const tb=el('tbody');
   for(const d of [...state.documents].reverse()){
     const row=el('tr');
     const act=el('div',{class:'btnrow'});
+    act.appendChild(el('button',{class:'btn small', text:'👁 Valeurs', onclick:()=>voirValeurs(d)}));
     act.appendChild(el('button',{class:'btn small', text:'Retélécharger', onclick:()=>retelechargerDocument(d)}));
     act.appendChild(el('button',{class:'btn small danger', text:'Retirer', onclick:()=>{ state.documents=state.documents.filter(x=>x.code!==d.code); renderAll(); }}));
-    row.appendChild(el('td',{}, el('code',{text:d.code})));
-    row.appendChild(el('td',{text:d.fileName}));
-    row.appendChild(el('td',{text:d.titre}));
-    row.appendChild(el('td',{text:(d.sourceType==='modele'?'Modèle ':'Trame ')+d.sourceName}));
-    row.appendChild(el('td',{}, d.chrono? el('code',{text:d.chrono}) : '—'));
+    row.appendChild(el('td',{}, el('code',{text:d.chrono||d.code})));
     row.appendChild(el('td',{text:fmtDate(d.date)}));
+    row.appendChild(el('td',{text:d.projetNom||'—'}));
+    row.appendChild(el('td',{text:(d.typeDocNom||'—')+(d.trigramme?' ('+d.trigramme+')':'')}));
+    row.appendChild(el('td',{text:d.modeleNom||'—'}));
+    row.appendChild(el('td',{text:d.titre}));
+    row.appendChild(el('td',{text:d.fileName}));
     row.appendChild(el('td',{}, act));
     tb.appendChild(row);
   }
@@ -1424,7 +1723,8 @@ function renderDocuments(){
 function renderRegistre(){
   const c=$('#registreHtml'); c.innerHTML='';
   for(const sheet of registreSheets(state)){
-    c.appendChild(el('h3',{class:'grid-title', text:'Feuille « '+sheet.name+' »'}));
+    const isTD=sheet.name.startsWith('TD ');
+    c.appendChild(el('h3',{class:'grid-title', text:(isTD?'🗂 ':'📊 ')+'Feuille « '+sheet.name+' »'}));
     if(sheet.name==='Fichiers'){
       const det=el('details');
       det.appendChild(el('summary',{text:'Contenu des fichiers de trames (base64) — '+(sheet.rows.length-1)+' fichier(s)'}));
@@ -1448,14 +1748,13 @@ function tableDepuisLignes(rows, tronquer){
   return t;
 }
 
-/* bandeau des documents générés (sous le menu) */
 function renderBandeau(){
   const c=$('#bandeauDocs'); c.innerHTML='';
   const docs=[...state.documents].slice(-14).reverse();
   if(!docs.length){ c.appendChild(el('span',{class:'note', text:'aucun pour le moment'})); return; }
   for(const d of docs){
-    const chip=el('button',{class:'doc-chip', title:d.fileName+' — clic : voir dans Documents · double-clic : retélécharger'});
-    chip.appendChild(el('span',{class:'doc-code', text:d.code}));
+    const chip=el('button',{class:'doc-chip', title:d.fileName+' — clic : page Documents · double-clic : retélécharger · valeurs : bouton 👁'});
+    chip.appendChild(el('span',{class:'doc-code', text:d.chrono||d.code}));
     chip.appendChild(el('span',{class:'doc-titre', text:d.titre}));
     chip.addEventListener('click',()=>selectPage('documents'));
     chip.addEventListener('dblclick',()=>retelechargerDocument(d));
@@ -1464,130 +1763,112 @@ function renderBandeau(){
 }
 
 /* ============================================================
-   DOCUMENTATION MARKDOWN (aussi exportable depuis l'application)
+   DOCUMENTATION MARKDOWN
    ============================================================ */
 const DOC_MD = [
 '# Gestion Documentaire — documentation',
 '',
-'Version '+APP_VERSION+' — application monopage 100 % locale (aucun réseau).',
+'Version '+APP_VERSION+' — application monopage 100 % locale (aucun réseau) : un seul',
+'fichier `index.html`, ouvert directement dans le navigateur ; seules les entrées/sorties',
+'sont des **fichiers sur le disque**.',
 '',
-'Application web **monopage** : un seul fichier `index.html`, **aucun accès réseau**.',
-'Ouvrez-le simplement dans un navigateur (double-clic sur le fichier) : tout fonctionne',
-'en local, et les seules entrées/sorties sont des **fichiers sur le disque**.',
+'## Hiérarchie : Projet > Types de document / Modèles',
+'',
+'- **Projet** (niveau du haut, sélecteur dans le **bandeau** en haut de l\'écran) : les',
+'  types de document et les modèles **appartiennent au projet actif**. Gérez les projets',
+'  dans Paramètres (créer / activer / supprimer).',
+'- **Type de document** (nouveau nom de « trame ») : un **nom**, un **trigramme**',
+'  (3 caractères A-Z/0-9, unique dans le projet, ex. `CTR`) et une **trame** (le fichier',
+'  .docx/.xlsx/.pptx contenant les balises `[..]`).',
+'- **Modèle** : appartient à un type de document du projet ; il a son propre **trigramme**,',
+'  qui **remplace l\'ancien préfixe** : c\'est le trigramme du modèle qui est utilisé dans le',
+'  nom des fichiers générés depuis ce modèle (à défaut, celui du type de document). Tout ou',
+'  partie des balises y sont fixées à une valeur.',
 '',
 '## Interface',
 '',
-'- **Page principale « Nouveau document »** (au centre de l\'écran) : une **grille de cartes**',
-'  présentant les **modèles** et les **trames**. Cliquez sur une carte pour générer un',
-'  document (depuis le modèle, ou en complétant les balises restantes de la trame).',
-'- **Bandeau** sous le menu du haut : les **documents générés** (code + titre) ;',
-'  clic = voir dans la page Documents, double-clic = retélécharger le fichier.',
-'- **Pages secondaires** (menu du haut) :',
-'  - `Trames` : import des fichiers de trames, liste, mise à jour rétro-compatible,',
-'    création de modèles, génération ;',
-'  - `Modèles` : création / modification / suppression, génération ;',
-'  - `Documents` : liste complète des documents générés (code unique, nom',
-'    `prefixe-code-titre.ext`, chrono), retéléchargement ;',
-'  - `Registre` : consultation du tableau Excel complet ;',
-'  - `Paramètres` : chemins du dossier des trames et du registre Excel, export/import',
-'    manuels, documentation.',
-'- **Barre d\'état** en bas : compteurs, préfixe des documents, prochain code et chrono.',
+'- **Bandeau** en haut (style Office, dégradé bleu) : icône, titre, **sélecteur de projet**,',
+'  et onglets de navigation : 🏠 Nouveau document, 📄 Types de document, 📋 Modèles,',
+'  🗂 Documents, 📊 Registre, ⚙ Paramètres.',
+'- **Page principale « Nouveau document »** : **grille de cartes ludiques** des modèles et',
+'  types de document du projet actif, **chacune avec une prévisualisation** du contenu de la',
+'  trame (balises surlignées). Clic sur une carte = fenêtre de génération.',
+'- **Fenêtre de génération** : formulaire des balises **à côté d\'une prévisualisation live**',
+'  (les balises se remplissent au fur et à mesure de la saisie).',
+'- **Bandeau des documents générés** (sous le bandeau principal) : pastilles chrono + titre ;',
+'  clic = page Documents, double-clic = retélécharger.',
+'- **Barre d\'état** en bas : projet actif, compteurs, indicateurs de persistance, prochain chrono.',
 '',
-'## Persistance automatique (dossier des trames + registre Excel)',
+'## Nom des fichiers exportés',
 '',
-'Pour retrouver trames, modèles et documents **dès l\'ouverture de l\'application** :',
+'`aaaammjj_projet_typededocument_chrono - Titre du document.ext`',
 '',
-'- dans **Paramètres**, renseignez le **chemin réseau du dossier des trames** et le',
-'  **chemin réseau du registre Excel** (ex. `\\\\serveur\\partage\\trames`), puis associez',
-'  les emplacements réels avec « Parcourir… » (API File System Access : Chrome/Edge ;',
-'  l\'accès est redemandé à chaque ouverture). Les emplacements choisis sont conservés',
-'  localement (IndexedDB).',
-'- **Dossier des trames** : chaque trame importée ou mise à jour y est copiée ; à',
-'  l\'ouverture, les trames du dossier sont rechargées automatiquement.',
-'- **Registre Excel** : à chaque modification (trame, modèle, document, paramètre), le',
-'  registre `.xlsx` est réenregistré automatiquement dans ce fichier ; à l\'ouverture, il',
-'  est rechargé (trames en base64, modèles, documents, préfixe, compteurs de codes et',
-'  de chrono, chemins).',
-'- Sans configuration (ou navigateur incompatible), l\'export/import manuel du registre',
-'  reste disponible dans Paramètres / page Registre.',
+'- `aaaammjj` : date de génération (ex. `20260213`) ;',
+'- `projet` : nom du projet (aplani) ;',
+'- `typededocument` : **trigramme** du modèle si génération depuis un modèle, sinon trigramme',
+'  du type de document ;',
+'- `chrono` : **numéro chrono unique** attribué au document (compteur persistant) ;',
+'- `Titre du document` : le titre saisi, qui joue le rôle d\'une balise `[TITRE]` et est écrit',
+'  dans la **propriété « Titre »** du fichier Office.',
 '',
-'## Concepts',
+'## Lire les valeurs des balises d\'un document',
 '',
-'- **Trame** : fichier source Word (.docx), Excel (.xlsx) ou PowerPoint (.pptx) contenant',
-'  des **balises** de la forme `[Nom de la balise]` dans son texte. À l\'import,',
-'  l\'application lit le fichier et **détecte automatiquement les balises** (même si',
-'  Word les a découpées en plusieurs morceaux internes).',
-'- **Mise à jour d\'une trame** : la nouvelle version doit être **rétro-compatible**',
-'  (au minimum les mêmes balises) ; sinon elle est refusée et les balises manquantes',
-'  sont listées. Les modèles existants restent valides.',
-'- **Modèle** : trame dont **tout ou partie des balises** ont été remplacées par une valeur',
-'  fixe. Les balises laissées vides seront demandées à la génération.',
-'- **Document généré** : obtenu à partir d\'un modèle (valeurs pré-remplies) ou d\'une',
-'  trame, en complétant les balises restantes ; l\'application propose **d\'enregistrer',
-'  le document** à l\'emplacement de votre choix.',
+'- Dans l\'application : page **Documents** → bouton **👁 Valeurs** de chaque ligne : tableau',
+'  balise → valeur saisie.',
+'- Dans le **registre Excel** : feuilles globales + **une table par type de document**',
+'  (feuille `TD <trigramme>`) listant ses documents avec **une colonne par balise**.',
 '',
-'## Balises découpées en plages de caractères',
+'## Balises découpées en plages et balise réservée [CHRONO]',
 '',
-'Si une trame contient `[XX-n]` ou `[XX-n-m]`, seule la **balise de base `XX`** est',
-'détectée ; la valeur de `XX` est saisie en entier et seules les positions demandées sont',
-'insérées : `[XX-n]` → n-ième caractère (en commençant à 1), `[XX-n-m]` → caractères n à m.',
-'Exemple : `XX = "ABCDE"` → `[XX-2]` donne `B`, `[XX-2-4]` donne `BCD`. L\'application',
-'**informe des plages présentes** (fenêtre « Balises », infobulles, aide des formulaires),',
-'notamment le **nombre minimum de caractères** attendu ; un avertissement est affiché si',
-'la valeur est plus courte.',
+'- `[XX-n]` / `[XX-n-m]` : seule la balise de base `XX` est détectée ; la valeur de `XX` est',
+'  saisie en entier et seules les positions n (ou n à m, en commençant à 1) sont insérées.',
+'  Les plages présentes et le **nombre minimum de caractères** sont affichés (fenêtre Balises,',
+'  infobulles, aide des formulaires) ; avertissement si la valeur est trop courte.',
+'- `[CHRONO]` (réservée, toute casse) : **jamais saisie** — remplie automatiquement avec le',
+'  numéro chrono du document (le même que dans son nom de fichier), y compris découpée',
+'  (`[CHRONO-2]`).',
 '',
-'## Balise réservée [CHRONO]',
+'## Persistance automatique',
 '',
-'La balise `chrono` (any casse) est **réservée** : remplie automatiquement par le **numéro',
-'chrono** généré par l\'application (compteur persistant, ex. `000007`). **Jamais saisie**',
-'dans un modèle ni un document : à chaque génération, un nouveau numéro est attribué à',
-'toutes les occurrences `[CHRONO]` (y compris découpées comme `[CHRONO-2]`). Il figure dans',
-'la liste des documents (colonne « Chrono ») et dans le registre.',
+'- **Paramètres** : chemins réseau du **dossier des trames** et du **registre Excel**',
+'  (ex. `\\\\serveur\\partage\\trames`) + « Parcourir… » pour associer les emplacements réels',
+'  (API File System Access, Chrome/Edge ; handles conservés en IndexedDB, accès revalidé à',
+'  chaque ouverture).',
+'- Le dossier des trames reçoit une copie du fichier de chaque type de document et est relu',
+'  à l\'ouverture. Le registre `.xlsx` est réenregistré automatiquement à chaque modification.',
+'- Sans configuration : export/import manuels du registre (Paramètres / page Registre).',
 '',
-'## Nommage et identité des documents générés',
+'## Registre Excel (feuilles)',
 '',
-'- **Code unique** `AAAA-NNNN` (année + compteur persistant, ex. `2026-0007`).',
-'- Fichier nommé **`prefixe-code-titre.ext`** (ex. `GD-2026-0007-Contrat ACME.docx`) :',
-'  `prefixe` = paramètre de l\'application (barre d\'état, `GD` par défaut) ; `titre` = titre',
-'  du document, équivalent d\'une balise (remplit `[TITRE]` si présent, la **propriété',
-'  « Titre »** du fichier Office, et le nom du fichier).',
-'',
-'## Registre Excel',
-'',
-'Le classeur (5 feuilles : `Paramètres`, `Trames`, `Modèles`, `Documents`, `Fichiers` en',
-'base64) est consultable dans la page Registre, enregistré automatiquement dans le fichier',
-'configuré (voir Paramètres), et exportable/importable manuellement.',
+'`Paramètres`, `Projets`, `Types de document`, `Modèles`, `Documents`, `Fichiers` (trames en',
+'base64), **plus une feuille `TD <trigramme>` par type de document** (ses documents, une',
+'colonne par balise avec les valeurs utilisées).',
 '',
 '## Utilisation pas à pas',
 '',
-'1. Page **Paramètres** : renseignez les chemins réseau et associez le dossier des trames',
-'   et le registre Excel (« Parcourir… »). Réglez le **préfixe** dans la barre d\'état.',
-'2. Page **Trames** → « Importer des trames… » : sélectionnez vos fichiers `.docx`/`.xlsx`/`.pptx`',
-'   à balises `[..]`. Ils sont copiés dans le dossier des trames.',
-'3. Créez des **modèles** (page Trames ou Modèles) en fixant tout ou partie des balises ;',
-'   ou mettez à jour une trame (version rétro-compatible exigée).',
-'4. Page principale **« Nouveau document »** : cliquez sur une carte de modèle ou de',
-'   trame → saisissez le **titre**, complétez les **balises restantes** → « Générer et',
-'   enregistrer ».',
-'5. Retrouvez les documents dans le **bandeau** (haut) ou la page **Documents** ; le',
-'   registre est à jour automatiquement.',
+'1. Créez un **projet** (bouton ＋ du bandeau).',
+'2. Paramètres : chemins réseau + « Parcourir… » pour le dossier des trames et le registre.',
+'3. Page **Types de document** : nom + trigramme + fichier trame → « Créer le type de',
+'   document » (les balises sont détectées automatiquement ; mise à jour rétro-compatible).',
+'4. Page **Modèles** : choisissez un type de document → « Nouveau modèle… » (nom +',
+'   trigramme + valeurs des balises).',
+'5. Page principale : cliquez sur une carte → **prévisualisation + formulaire** → titre,',
+'   balises restantes → « Générer et enregistrer » (nom `aaaammjj_projet_TRI_chrono - Titre.ext`).',
+'6. Page **Documents** / bandeau : retrouvez les documents, lisez les **valeurs par balise**',
+'   (👁), retéléchargez ; le registre (avec table par type de document) est à jour.',
 '',
 '## Détails techniques',
 '',
-'- Fichiers Office = ZIP de XML : l\'application embarque son propre **lecteur/écrivain ZIP**',
-'  et lit/écrit les parties XML concernées (`word/document.xml`, `ppt/slides/slideN.xml`,',
-'  `xl/sharedStrings.xml`, en-têtes/pieds, notes…).',
-'- Les balises sont recherchées dans le **texte concaténé** de chaque partie (balises',
-'  découpées en plusieurs « runs » gérées) ; le remplacement est reporté dans les bons',
-'  nœuds XML en conservant la mise en forme.',
-'- Le titre est écrit dans `docProps/core.xml` (`dc:title`).',
-'- Le registre `.xlsx` est généré et lu entièrement en local.',
-'- Aucune donnée ne quitte le navigateur : aucune requête réseau n\'est émise.',
+'- Fichiers Office = ZIP de XML : lecteur/écrivain ZIP embarqué (sans bibliothèque externe) ;',
+'  lecture/écriture des parties `word/document.xml`, `ppt/slides/slideN.xml`,',
+'  `xl/sharedStrings.xml`, en-têtes/pieds, notes… Balises recherchées dans le texte concaténé',
+'  (gestion des « runs » Word) ; remplacement reporté dans les bons nœuds XML.',
+'- Titre écrit dans `docProps/core.xml` (`dc:title`). Registre `.xlsx` généré/lu en local.',
+'- Aucune requête réseau n\'est émise.',
 '',
 '## Prérequis',
 '',
-'- Navigateur moderne ; Chrome/Edge recommandés pour la persistance automatique',
-'  (File System Access + IndexedDB). Sans cela, export/import manuels du registre.',
+'- Navigateur moderne ; Chrome/Edge recommandés pour la persistance automatique.',
 ''
 ].join('\n');
 
@@ -1597,20 +1878,17 @@ function initUI(){
   buildParametres();
   document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>selectPage(b.dataset.page)));
   $('#bandeauTous').addEventListener('click',()=>selectPage('documents'));
-  const pref=$('#paramPrefixe');
-  pref.value=state.params.prefixe;
-  pref.addEventListener('input',()=>{ state.params.prefixe=pref.value.trim()||'GD'; updateStatusbar(); persisterAuto(); });
-  $('#btnImporterTrames').addEventListener('click',()=>$('#fichiersTrames').click());
-  $('#fichiersTrames').addEventListener('change', e=>{
-    const f=e.target.files;
-    if(f.length) importTrames([...f]);
-    e.target.value='';
-  });
-  $('#btnCreerModele').addEventListener('click',()=>{
-    const sel=$('#selTrameModele');
-    const tr=state.trames.find(t=>t.id===sel.value);
-    if(tr) ouvrirModaleModele(tr,null);
-    else message($('#msgTrames'),'warn','Sélectionnez d’abord une trame.');
+  $('#selProjet').addEventListener('change', e=>{ state.projetActif=e.target.value||null; renderAll(); });
+  $('#btnNouveauProjet').addEventListener('click', nouveauProjet);
+  $('#btnGererProjets').addEventListener('click', ()=>selectPage('parametres'));
+  $('#btnChoisirFichier').addEventListener('click', choisirFichierTD);
+  $('#tdFichier').addEventListener('change', e=>onFichierTDChange(e.target));
+  $('#btnCreerTD').addEventListener('click', creerTD);
+  $('#btnCreerModele').addEventListener('click', ()=>{
+    const sel=$('#moTD');
+    const td=state.trames.find(t=>t.id===sel.value);
+    if(td) ouvrirModaleModele(td,null);
+    else message($('#msg'),'warn','Sélectionnez d’abord un type de document.');
   });
   $('#btnExporterRegistre').addEventListener('click',()=>exporterRegistre());
   $('#btnImporterRegistre').addEventListener('click',()=>$('#fichierRegistre').click());
@@ -1618,25 +1896,25 @@ function initUI(){
     const f=e.target.files[0]; if(!f) return;
     try{
       await importRegister(state, new Uint8Array(await f.arrayBuffer()));
-      pref.value=state.params.prefixe;
       renderAll();
-      message($('#msgTrames'),'ok','Registre importé : '+state.trames.length+' trame(s), '+state.modeles.length+' modèle(s), '+state.documents.length+' document(s), préfixe « '+state.params.prefixe+' ».');
-    }catch(err){ message($('#msgTrames'),'err','Import du registre impossible : '+err.message); }
+      message($('#msg'),'ok','Registre importé : '+state.projets.length+' projet(s), '+state.trames.length+' type(s) de document, '+state.modeles.length+' modèle(s), '+state.documents.length+' document(s).');
+    }catch(err){ message($('#msg'),'err','Import du registre impossible : '+err.message); }
     e.target.value='';
   });
   selectPage('accueil');
   renderAll();
   restaurerPersistance().then(msgs=>{
     renderAll();
-    if(msgs.length) message($('#msgTrames'),'info','Persistance : '+msgs.join(' — '));
+    if(msgs.length) message($('#msg'),'info','Persistance : '+msgs.join(' — '));
   }).catch(()=>{});
 }
 
 /* ---------- exposition pour tests / debug ---------- */
 globalThis.GD = { state, crc32, zipWrite, zipRead, officeKind, textPartsOf, detectTagsInBytes,
   detectTagsInZip, applyValuesToPart, setCoreTitle, generateDocument, sanitizeFileName,
-  docFileName, nextCode, nextChrono, peekChrono, parseTagInner, sliceValue, isReservedTag, ajouterTrame,
-  esc, decXml, u8ToB64, b64ToU8, buildXlsx, parseXlsx,
+  docFileName, fileNameForDoc, slugPart, nextCode, nextChrono, peekChrono, parseTagInner, sliceValue,
+  isReservedTag, normalizeTrigramme, validateTrigramme, genTrigramme, ajouterTypeDocument,
+  extractPreviewLines, esc, decXml, u8ToB64, b64ToU8, buildXlsx, parseXlsx,
   registreSheets, buildRegister, importRegister, balisesManquantes, MIMES, DOC_MD, APP_VERSION };
 
 if (typeof document !== 'undefined') {

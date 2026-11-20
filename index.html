@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestion Documentaire</title>
+<style>
+  :root{
+    --fond:#0f172a; --panneau:#1e293b; --panneau2:#273449; --bord:#334155;
+    --texte:#e2e8f0; --attenue:#94a3b8; --accent:#38bdf8; --accent2:#0ea5e9;
+    --ok:#22c55e; --err:#ef4444; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;background:var(--fond);color:var(--texte);}
+  header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 20px;background:var(--panneau);border-bottom:1px solid var(--bord);}
+  header h1{font-size:20px;margin:0;color:var(--accent);letter-spacing:.5px}
+  header .sous-titre{color:var(--attenue);font-size:12px}
+  header .spacer{flex:1}
+  .params{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--attenue)}
+  .params input{width:110px}
+  input,select,button{font:inherit}
+  input[type=text],input:not([type]){background:var(--panneau2);border:1px solid var(--bord);color:var(--texte);border-radius:6px;padding:6px 8px}
+  button{background:var(--accent2);border:none;color:#fff;border-radius:6px;padding:7px 12px;cursor:pointer;font-size:13px}
+  button:hover{background:var(--accent);color:#082f49}
+  button.secondaire{background:var(--panneau2);border:1px solid var(--bord);color:var(--texte)}
+  button.secondaire:hover{background:var(--bord)}
+  button.danger{background:#7f1d1d}
+  button.danger:hover{background:var(--err)}
+  button.petit{padding:3px 8px;font-size:12px}
+  nav{display:flex;gap:4px;padding:8px 20px 0;background:var(--panneau);border-bottom:1px solid var(--bord)}
+  nav button{background:transparent;color:var(--attenue);border-radius:6px 6px 0 0;border:1px solid transparent;border-bottom:none;padding:8px 16px}
+  nav button.active{background:var(--fond);color:var(--accent);border-color:var(--bord)}
+  main{padding:20px}
+  section.onglet{display:none}
+  section.onglet.active{display:block}
+  .carte{background:var(--panneau);border:1px solid var(--bord);border-radius:10px;padding:16px;margin-bottom:16px}
+  .carte h2{margin-top:0;font-size:16px;color:var(--accent)}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border:1px solid var(--bord);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:var(--panneau2);color:var(--accent);white-space:nowrap}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+  .balise{display:inline-block;background:#164e63;color:#a5f3fc;border-radius:4px;padding:1px 6px;margin:1px 2px;font-family:Consolas,monospace;font-size:12px}
+  .vide{color:var(--attenue);font-style:italic;padding:20px;text-align:center}
+  .modal-fond{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50}
+  .modal{background:var(--panneau);border:1px solid var(--bord);border-radius:10px;padding:20px;max-width:640px;width:92%;max-height:85vh;overflow:auto}
+  .modal h3{margin-top:0;color:var(--accent)}
+  .modal .pied{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+  .champ{margin-bottom:10px}
+  .champ label{display:block;font-size:12px;color:var(--attenue);margin-bottom:3px}
+  .champ input{width:100%}
+  .alerte{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px}
+  .alerte.err{background:#450a0a;border:1px solid var(--err);color:#fecaca}
+  .alerte.ok{background:#052e16;border:1px solid var(--ok);color:#bbf7d0}
+  .alerte.warn{background:#451a03;border:1px solid var(--warn);color:#fde68a}
+  .note{font-size:12px;color:var(--attenue)}
+  code{background:var(--panneau2);padding:1px 5px;border-radius:4px;font-family:Consolas,monospace}
+  .actions{display:flex;flex-wrap:wrap;gap:6px}
+  .onglet-registre h3{margin:18px 0 6px;color:var(--accent);font-size:14px}
+  details{margin-bottom:6px}
+  summary{cursor:pointer;color:var(--attenue);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Gestion Documentaire</h1>
+    <div class="sous-titre">Application 100&nbsp;% locale — aucune connexion réseau requise — fonctionne directement depuis le disque</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="params">
+    <label for="paramPrefixe">Préfixe des documents&nbsp;:</label>
+    <input type="text" id="paramPrefixe" value="GD">
+  </div>
+  <button class="secondaire" id="btnImporterRegistre">Importer un registre Excel</button>
+  <button class="secondaire" id="btnExporterRegistre">Exporter le registre Excel</button>
+  <button class="secondaire" id="btnExporterDoc">Documentation (markdown)</button>
+  <input type="file" id="fichierRegistre" accept=".xlsx" hidden>
+</header>
+<nav id="navOnglets">
+  <button data-onglet="trames" class="active">Trames</button>
+  <button data-onglet="modeles">Modèles</button>
+  <button data-onglet="documents">Documents générés</button>
+  <button data-onglet="registre">Registre Excel</button>
+</nav>
+<main>
+  <section class="onglet active" id="onglet-trames">
+    <div class="carte">
+      <h2>Importer des trames</h2>
+      <p class="note">Une <strong>trame</strong> est un fichier Word (.docx), Excel (.xlsx) ou PowerPoint (.pptx) contenant des balises de la forme <code>[Nom de la balise]</code>. L'application détecte automatiquement les balises présentes dans le texte du fichier.</p>
+      <div class="actions">
+        <input type="file" id="fichiersTrames" accept=".docx,.xlsx,.pptx" multiple>
+        <button id="btnImporterTrames">Importer ces trames</button>
+      </div>
+      <div id="msgTrames"></div>
+    </div>
+    <div class="carte">
+      <h2>Trames en mémoire</h2>
+      <div id="listeTrames"></div>
+    </div>
+  </section>
+  <section class="onglet" id="onglet-modeles">
+    <div class="carte">
+      <h2>Modèles</h2>
+      <p class="note">Un <strong>modèle</strong> est une trame dont tout ou partie des balises ont été remplacées par une valeur fixe. Créez un modèle depuis l'onglet Trames.</p>
+      <div id="listeModeles"></div>
+    </div>
+  </section>
+  <section class="onglet" id="onglet-documents">
+    <div class="carte">
+      <h2>Documents générés</h2>
+      <div id="listeDocuments"></div>
+    </div>
+  </section>
+  <section class="onglet onglet-registre" id="onglet-registre">
+    <div class="carte">
+      <h2>Registre Excel (consultation)</h2>
+      <p class="note">L'application conserve en mémoire les fichiers de trames ainsi que la liste des trames, modèles et documents générés. Ce tableau correspond exactement au fichier Excel exportable.</p>
+      <div id="registreHtml"></div>
+    </div>
+  </section>
+</main>
+<div id="modalRoot"></div>
+<script>
+'use strict';
+/* ============================================================
+   GESTION DOCUMENTAIRE — application monopage 100 % locale.
+   Aucune ressource réseau : tout est embarqué dans ce fichier
+   et les échanges se font uniquement avec des fichiers disque
+   (sélecteurs de fichiers, enregistrements proposés).
+   ============================================================ */
+
+/* ---------- état en mémoire ---------- */
+const state = {
+  params: { prefixe: 'GD' },   // préfixe des documents générés (paramètre application)
+  seq: 1,                       // compteur pour les codes uniques
+  trames: [],                   // {id, name, kind, bytes, tags, counts, importedAt, updatedAt}
+  modeles: [],                  // {id, trameId, name, values:{balise:valeur}, createdAt}
+  documents: []                 // {code, prefixe, titre, fileName, sourceType, sourceId, sourceName, values, date}
+};
+
+/*@@SUITE@@*/
+
+/* ---------- exposition pour tests / debug ---------- */
+globalThis.GD = { state };
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => { if (typeof initUI === 'function') initUI(); });
+}
+</script>
+</body>
+</html>

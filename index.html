@@ -138,10 +138,234 @@ const state = {
   documents: []                 // {code, prefixe, titre, fileName, sourceType, sourceId, sourceName, values, date}
 };
 
+/* ============================================================
+   COEUR TECHNIQUE (pur, sans DOM — testable hors navigateur)
+   ============================================================ */
+const TE = new TextEncoder(), TD = new TextDecoder();
+const enc = s => TE.encode(s);
+const dec = u8 => TD.decode(u8);
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){ return esc(s).replace(/"/g,'&quot;'); }
+function decXml(s){
+  return String(s)
+    .replace(/&#x([0-9a-fA-F]+);/g, (_,h)=>String.fromCodePoint(parseInt(h,16)))
+    .replace(/&#(\d+);/g, (_,d)=>String.fromCodePoint(parseInt(d,10)))
+    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')
+    .replace(/&apos;/g,"'").replace(/&amp;/g,'&');
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,9); }
+function u8ToB64(u8){ let s=''; for(let i=0;i<u8.length;i+=0x8000){ s += String.fromCharCode.apply(null, u8.subarray(i,i+0x8000)); } return btoa(s); }
+function b64ToU8(b){ const s=atob(b); const u8=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u8[i]=s.charCodeAt(i); return u8; }
+
+/* ---------- CRC32 (pour l'écriture ZIP) ---------- */
+const CRC_TABLE = (()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); t[n]=c>>>0; } return t; })();
+function crc32(u8){ let c=0xFFFFFFFF; for(let i=0;i<u8.length;i++) c=CRC_TABLE[(c^u8[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+
+/* ---------- ZIP : écriture (entrées stockées, sans compression) ---------- */
+function dosDateTime(d){ d=d||new Date(); return {
+  time:(d.getHours()<<11)|(d.getMinutes()<<5)|Math.floor(d.getSeconds()/2),
+  date:(((d.getFullYear()-1980)&0x7F)<<9)|((d.getMonth()+1)<<5)|d.getDate() }; }
+
+/** entries: [{name, data:Uint8Array}] -> Uint8Array (archive ZIP valide, méthode "stockée") */
+function zipWrite(entries){
+  const {time,date}=dosDateTime();
+  const parts=[], central=[]; let offset=0;
+  for(const e of entries){
+    const nameU8=enc(e.name), data=e.data, crc=crc32(data);
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true);
+    lh.setUint16(8,0,true); lh.setUint16(10,time,true); lh.setUint16(12,date,true);
+    lh.setUint32(14,crc,true); lh.setUint32(18,data.length,true); lh.setUint32(22,data.length,true);
+    lh.setUint16(26,nameU8.length,true); lh.setUint16(28,0,true);
+    parts.push(new Uint8Array(lh.buffer), nameU8, data);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0x0800,true);
+    ch.setUint16(10,0,true); ch.setUint16(12,time,true); ch.setUint16(14,date,true);
+    ch.setUint32(16,crc,true); ch.setUint32(20,data.length,true); ch.setUint32(24,data.length,true);
+    ch.setUint16(28,nameU8.length,true); ch.setUint16(30,0,true); ch.setUint16(32,0,true);
+    ch.setUint16(34,0,true); ch.setUint16(36,0,true); ch.setUint32(38,0,true); ch.setUint32(42,offset,true);
+    central.push(new Uint8Array(ch.buffer), nameU8);
+    offset += 30 + nameU8.length + data.length;
+  }
+  const centralStart=offset; let centralSize=0; for(const c of central) centralSize+=c.length;
+  const eocd=new DataView(new ArrayBuffer(22));
+  eocd.setUint32(0,0x06054b50,true); eocd.setUint16(8,entries.length,true); eocd.setUint16(10,entries.length,true);
+  eocd.setUint32(12,centralSize,true); eocd.setUint32(16,centralStart,true); eocd.setUint16(20,0,true);
+  parts.push(...central, new Uint8Array(eocd.buffer));
+  let total=0; for(const p of parts) total+=p.length;
+  const out=new Uint8Array(total); let o=0; for(const p of parts){ out.set(p,o); o+=p.length; }
+  return out;
+}
+
+/* ---------- ZIP : lecture (stocké + deflate via DecompressionStream) ---------- */
+async function inflateRaw(u8){
+  const ds=new DecompressionStream('deflate-raw');
+  const stream=new Blob([u8]).stream().pipeThrough(ds);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+/** u8 -> Map(nom -> Uint8Array) */
+async function zipRead(u8){
+  const dv=new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  let eocd=-1;
+  for(let i=u8.length-22; i>=Math.max(0,u8.length-22-65535); i--){
+    if(dv.getUint32(i,true)===0x06054b50){ eocd=i; break; }
+  }
+  if(eocd<0) throw new Error('Archive ZIP invalide (fin d\'archive introuvable)');
+  const count=dv.getUint16(eocd+10,true);
+  let ptr=dv.getUint32(eocd+16,true);
+  const map=new Map();
+  for(let n=0;n<count;n++){
+    if(dv.getUint32(ptr,true)!==0x02014b50) throw new Error('Archive ZIP invalide (annuaire central)');
+    const method=dv.getUint16(ptr+10,true);
+    const csize=dv.getUint32(ptr+20,true);
+    const nameLen=dv.getUint16(ptr+28,true), extraLen=dv.getUint16(ptr+30,true), comLen=dv.getUint16(ptr+32,true);
+    const localOff=dv.getUint32(ptr+42,true);
+    const name=TD.decode(u8.subarray(ptr+46, ptr+46+nameLen));
+    ptr += 46+nameLen+extraLen+comLen;
+    if(dv.getUint32(localOff,true)!==0x04034b50) throw new Error('Archive ZIP invalide (en-tête local)');
+    const lNameLen=dv.getUint16(localOff+26,true), lExtraLen=dv.getUint16(localOff+28,true);
+    const dataStart=localOff+30+lNameLen+lExtraLen;
+    const cdata=u8.subarray(dataStart, dataStart+csize);
+    let data;
+    if(method===0) data=new Uint8Array(cdata);
+    else if(method===8) data=await inflateRaw(cdata);
+    else throw new Error('Méthode de compression ZIP non supportée : '+method);
+    map.set(name, data);
+  }
+  return map;
+}
+
+/* ============================================================
+   FICHIERS OFFICE (docx / xlsx / pptx = des ZIP de XML)
+   ============================================================ */
+const MIMES={ docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
+function officeKind(name){ const n=String(name).toLowerCase();
+  if(n.endsWith('.docx'))return'docx'; if(n.endsWith('.xlsx'))return'xlsx'; if(n.endsWith('.pptx'))return'pptx'; return null; }
+
+/** Parties XML contenant du texte visible selon le type de fichier */
+function textPartsOf(kind, names){
+  if(kind==='docx')   return names.filter(n=>/^word\/(document|header\d*|footer\d*|footnotes|endnotes)\.xml$/.test(n));
+  if(kind==='pptx')   return names.filter(n=>/^ppt\/(slides|notesSlides)\/(slide|notesSlide)\d+\.xml$/.test(n));
+  if(kind==='xlsx')   return names.filter(n=> n==='xl/sharedStrings.xml' || /^xl\/worksheets\/sheet\d+\.xml$/.test(n));
+  return [];
+}
+/** Expression régulière capturant les nœuds texte de la partie */
+function partRegex(kind){
+  if(kind==='docx') return /(<w:t(?:\s[^>]*)?>)([\s\S]*?)(<\/w:t>)/g;
+  if(kind==='pptx') return /(<a:t>)([\s\S]*?)(<\/a:t>)/g;
+  if(kind==='xlsx') return /(<t(?:\s[^>]*)?>)([\s\S]*?)(<\/t>)/g;
+  return null;
+}
+
+/* Segments = nœuds texte d'un XML ; on concatène leur contenu pour voir
+   les balises même si Word les a découpées en plusieurs "runs". */
+function collectSegments(xml, re){
+  re.lastIndex=0;
+  const segs=[], starts=[]; let combined='', m;
+  while((m=re.exec(xml))!==null){
+    const raw=m[2]; if(!raw) continue;
+    starts.push(combined.length);
+    segs.push({ xmlStart:m.index+m[1].length, xmlEnd:m.index+m[1].length+raw.length, text:decXml(raw) });
+    combined+=segs[segs.length-1].text;
+  }
+  return { segs, starts, combined };
+}
+const TAG_RE=/\[([^\[\]\n]{1,200})\]/g;
+
+/** Détecte les balises [..] d'un fichier Office -> {tags, counts, parts} */
+async function detectTagsInBytes(kind, u8){
+  const zip=await zipRead(u8 instanceof Uint8Array ? u8 : new Uint8Array(u8));
+  return detectTagsInZip(kind, zip);
+}
+function detectTagsInZip(kind, zip){
+  const re=partRegex(kind);
+  const all=[], counts={}, parts=textPartsOf(kind, [...zip.keys()]);
+  for(const p of parts){
+    if(!zip.has(p)) continue;
+    const { combined }=collectSegments(dec(zip.get(p)), re);
+    TAG_RE.lastIndex=0; let m;
+    while((m=TAG_RE.exec(combined))!==null){
+      const t=m[1].trim(); if(!t) continue;
+      counts[t]=(counts[t]||0)+1; if(!all.includes(t)) all.push(t);
+    }
+  }
+  return { tags:all, counts, parts };
+}
+
+/** Remplace dans une partie XML les balises dont la valeur est fournie.
+    values : Map(clé = balise en minuscules -> valeur) */
+function applyValuesToPart(xml, re, values){
+  const { segs, starts, combined }=collectSegments(xml, re);
+  TAG_RE.lastIndex=0;
+  const matches=[]; let m;
+  while((m=TAG_RE.exec(combined))!==null){
+    const key=m[1].trim().toLowerCase();
+    if(values.has(key)) matches.push({ start:m.index, end:m.index+m[0].length, value:values.get(key) });
+  }
+  matches.sort((a,b)=>b.start-a.start);
+  const texts=segs.map(s=>s.text);
+  for(const mt of matches){
+    let firstIdx=-1;
+    for(let i=0;i<segs.length;i++){
+      const s0=starts[i], s1=s0+segs[i].text.length;
+      if(mt.end<=s0 || mt.start>=s1) continue;
+      if(firstIdx<0) firstIdx=i;
+      const ovS=Math.max(mt.start,s0)-s0, ovE=Math.min(mt.end,s1)-s0;
+      texts[i]=texts[i].slice(0,ovS)+(i===firstIdx?mt.value:'')+texts[i].slice(ovE);
+    }
+  }
+  let out='', pos=0;
+  for(let i=0;i<segs.length;i++){ out+=xml.slice(pos, segs[i].xmlStart)+esc(texts[i]); pos=segs[i].xmlEnd; }
+  out+=xml.slice(pos);
+  return out;
+}
+
+/** Écrit le titre dans la propriété du document (docProps/core.xml) */
+function setCoreTitle(xml, title){
+  const t='<dc:title>'+esc(title)+'</dc:title>';
+  if(/<dc:title[\s>]/.test(xml)) return xml.replace(/<dc:title(?:\s[^>]*)?>[\s\S]*?<\/dc:title>/, t);
+  if(/<\/cp:coreProperties>/.test(xml)) return xml.replace(/<\/cp:coreProperties>/, t+'</cp:coreProperties>');
+  return xml.replace(/>/, '>'+t);
+}
+
+/** Génère les octets du document final à partir d'une trame.
+    trame: {kind, bytes} ; values: Map(minuscule->valeur) ; titre: string */
+async function generateDocument(trame, values, titre){
+  const u8 = trame.bytes instanceof Uint8Array ? trame.bytes : new Uint8Array(trame.bytes);
+  const zip=await zipRead(u8);
+  const re=partRegex(trame.kind);
+  for(const p of textPartsOf(trame.kind, [...zip.keys()])){
+    if(!zip.has(p)) continue;
+    zip.set(p, enc(applyValuesToPart(dec(zip.get(p)), re, values)));
+  }
+  if(zip.has('docProps/core.xml'))
+    zip.set('docProps/core.xml', enc(setCoreTitle(dec(zip.get('docProps/core.xml')), titre)));
+  return zipWrite([...zip.entries()].map(([name,data])=>({name, data})));
+}
+
+/* ---------- nommage des documents générés : prefixe-code-titre.ext ---------- */
+function sanitizeFileName(s){
+  return String(s).replace(/[\\/:*?"<>|\x00-\x1f]/g,'-').replace(/\s+/g,' ').trim().replace(/^[. ]+|[. ]+$/g,'') || 'document';
+}
+function docFileName(prefixe, code, titre, ext){
+  return prefixe+'-'+code+'-'+sanitizeFileName(titre)+'.'+ext;
+}
+/** Code unique : année + compteur séquentiel persistant, ex. 2026-0007 */
+function nextCode(st){
+  const code=new Date().getFullYear()+'-'+String(st.seq).padStart(4,'0');
+  st.seq++;
+  return code;
+}
+
 /*@@SUITE@@*/
 
 /* ---------- exposition pour tests / debug ---------- */
-globalThis.GD = { state };
+globalThis.GD = { state, crc32, zipWrite, zipRead, officeKind, textPartsOf, detectTagsInBytes,
+  detectTagsInZip, applyValuesToPart, setCoreTitle, generateDocument, sanitizeFileName,
+  docFileName, nextCode, esc, decXml, u8ToB64, b64ToU8 };
 
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => { if (typeof initUI === 'function') initUI(); });

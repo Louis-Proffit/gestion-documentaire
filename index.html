@@ -211,6 +211,7 @@ const state = {
   documents: [],                // {code, prefixe, titre, fileName, sourceType, sourceId, sourceName, chrono, values, date}
   handles: { dossierTrames:null, registreExcel:null } // FileSystemDirectoryHandle / FileSystemFileHandle (persistance auto)
 };
+const APP_VERSION='1.0';
 
 /* ============================================================
    COEUR TECHNIQUE (pur, sans DOM — testable hors navigateur)
@@ -1100,7 +1101,7 @@ function exporterRegistre(){ return saveBytes(buildRegister(state), 'registre-ge
 function exporterDoc(){ return saveBytes(enc(DOC_MD), 'documentation-gestion-documentaire.md', 'text/markdown'); }
 function apropos(){
   const corps=el('div');
-  corps.appendChild(el('p',{text:'Gestion Documentaire — version 1.0'}));
+  corps.appendChild(el('p',{text:'Gestion Documentaire — version '+APP_VERSION}));
   corps.appendChild(el('p',{class:'note',text:'Application monopage 100 % locale : un seul fichier index.html, aucun accès réseau, uniquement des fichiers sur le disque.'}));
   corps.appendChild(el('p',{text:state.trames.length+' trame(s) · '+state.modeles.length+' modèle(s) · '+state.documents.length+' document(s) · préfixe « '+(state.params.prefixe||'GD')+' » · prochain code '+peekCode()}));
   openModal('À propos de Gestion Documentaire', corps, [{label:'Fermer', class:'btn primary'}]);
@@ -1468,6 +1469,8 @@ function renderBandeau(){
 const DOC_MD = [
 '# Gestion Documentaire — documentation',
 '',
+'Version '+APP_VERSION+' — application monopage 100 % locale (aucun réseau).',
+'',
 'Application web **monopage** : un seul fichier `index.html`, **aucun accès réseau**.',
 'Ouvrez-le simplement dans un navigateur (double-clic sur le fichier) : tout fonctionne',
 'en local, et les seules entrées/sorties sont des **fichiers sur le disque**.',
@@ -1590,6 +1593,7 @@ const DOC_MD = [
 
 /* ---------- initialisation ---------- */
 function initUI(){
+  document.title='Gestion Documentaire v'+APP_VERSION;
   buildParametres();
   document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>selectPage(b.dataset.page)));
   $('#bandeauTous').addEventListener('click',()=>selectPage('documents'));
@@ -1633,7 +1637,7 @@ globalThis.GD = { state, crc32, zipWrite, zipRead, officeKind, textPartsOf, dete
   detectTagsInZip, applyValuesToPart, setCoreTitle, generateDocument, sanitizeFileName,
   docFileName, nextCode, nextChrono, peekChrono, parseTagInner, sliceValue, isReservedTag, ajouterTrame,
   esc, decXml, u8ToB64, b64ToU8, buildXlsx, parseXlsx,
-  registreSheets, buildRegister, importRegister, balisesManquantes, MIMES, DOC_MD };
+  registreSheets, buildRegister, importRegister, balisesManquantes, MIMES, DOC_MD, APP_VERSION };
 
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => { if (typeof initUI === 'function') initUI(); });

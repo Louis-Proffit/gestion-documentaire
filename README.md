@@ -1,6 +1,6 @@
 # Gestion Documentaire
 
-Application web **monopage** : un seul fichier `index.html`, **aucun accès réseau**.
+**Version 1.0** — application web **monopage** : un seul fichier `index.html`, **aucun accès réseau**.
 Ouvrez-le simplement dans un navigateur (double-clic sur le fichier) : tout fonctionne
 en local, et les seules entrées/sorties sont des **fichiers sur le disque**.
 

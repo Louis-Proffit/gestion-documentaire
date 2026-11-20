@@ -1,15 +1,97 @@
 # Gestion Documentaire
 
-Application web **monopage** (un seul fichier `index.html`), **100 % locale** : elle ne
-nécessite **aucun réseau** et interagit uniquement avec des fichiers sur le disque
-(sélecteurs d'ouverture / enregistrement de fichiers).
+Application web **monopage** : un seul fichier `index.html`, **aucun accès réseau**.
+Ouvrez-le simplement dans un navigateur (double-clic sur le fichier) : tout fonctionne
+en local, et les seules entrées/sorties sont des **fichiers sur le disque**
+(sélecteurs d'ouverture, enregistrements proposés via le sélecteur de fichiers du
+navigateur, ou téléchargement selon le navigateur).
 
-## Principe
+> La même documentation est embarquée dans l'application : bouton
+> **« Documentation (markdown) »** en haut à droite pour l'exporter en `.md`.
+
+## Concepts
 
 - **Trame** : fichier source Word (.docx), Excel (.xlsx) ou PowerPoint (.pptx) contenant
-  des balises de la forme `[Nom de la balise]`.
-- **Modèle** : trame dont tout ou partie des balises sont remplacées par une valeur fixe.
-- **Document généré** : produit à partir d'un modèle (ou directement d'une trame) en
-  complétant les balises restantes ; enregistré sous la forme `prefixe-code-titre.ext`.
+  des **balises** de la forme `[Nom de la balise]` dans son texte. À l'import,
+  l'application lit le fichier et **détecte automatiquement les balises** (même si
+  Word les a découpées en plusieurs morceaux internes).
+- **Mise à jour d'une trame** : on peut remplacer une trame par une nouvelle version du
+  fichier. La mise à jour n'est acceptée que si elle est **rétro-compatible**, c'est-à-dire
+  si la nouvelle version contient **au minimum les mêmes balises** que l'ancienne
+  (des balises supplémentaires sont autorisées). Sinon, la mise à jour est refusée et
+  les balises manquantes sont listées. Les modèles existants restent donc valides.
+- **Modèle** : trame dont **tout ou partie des balises** ont été remplacées par une valeur
+  fixe. Les balises laissées vides dans le modèle seront demandées au moment de la génération.
+- **Document généré** : obtenu à partir d'un modèle (valeurs pré-remplies) ou directement
+  d'une trame, en complétant les balises restantes. L'application propose alors
+  **d'enregistrer le document** à l'emplacement de votre choix.
 
-*(Documentation complète en cours de rédaction — voir les sections ci-dessous.)*
+## Nommage et identité des documents générés
+
+- Chaque document reçoit un **code unique** de la forme `AAAA-NNNN` (année + compteur
+  séquentiel persistant, ex. `2026-0007`).
+- Le fichier généré est nommé **`prefixe-code-titre.ext`**, par ex.
+  `GD-2026-0007-Contrat ACME.docx` :
+  - `prefixe` est un **paramètre de l'application** (champ en haut à droite, `GD` par défaut) ;
+  - `code` est le code unique ci-dessus ;
+  - `titre` est le **titre du document**, qui joue le rôle d'une balise : s'il existe une
+    balise `[TITRE]` dans la trame, elle est remplie avec cette valeur, et dans tous les cas
+    le titre est écrit dans la **propriété « Titre » du document** (métadonnée du fichier
+    Office) et dans le nom du fichier.
+
+## Registre Excel
+
+L'application conserve **en mémoire** :
+
+- les **fichiers de trames** eux-mêmes, et
+- la **liste des trames, des modèles et des documents générés**,
+
+le tout sous la forme d'un **tableau Excel** (`.xlsx`) que vous pouvez :
+
+- **consulter dans l'application** (onglet « Registre Excel ») ;
+- **exporter** (bouton « Exporter le registre Excel ») pour le conserver sur le disque ;
+- **réimporter** (bouton « Importer un registre Excel ») pour restaurer toute la session
+  (trames, modèles, documents, préfixe, compteur de codes).
+
+Le classeur contient 5 feuilles : `Paramètres`, `Trames`, `Modèles`, `Documents`,
+`Fichiers` (contenu des trames en base64).
+
+## Utilisation pas à pas
+
+1. Renseignez le **préfixe** des documents en haut à droite.
+2. Onglet **Trames** → sélectionnez un ou plusieurs fichiers `.docx`/`.xlsx`/`.pptx`
+   contenant des balises `[..]` → « Importer ces trames ». Les balises détectées
+   apparaissent dans le tableau.
+3. Sur une trame : « Créer un modèle » pour fixer tout ou partie des balises,
+   ou « Mettre à jour » pour charger une version rétro-compatible du fichier.
+4. Onglet **Modèles** (ou directement depuis une trame) → « Générer un document » :
+   saisissez le **titre**, complétez les **balises restantes**, puis validez.
+5. Choisissez où **enregistrer le document généré** (nommé `prefixe-code-titre.ext`).
+6. Onglet **Documents générés** : retrouvez la liste avec les codes uniques et
+   re-téléchargez un document si besoin.
+7. Onglet **Registre Excel** : consultez le tableau ; bouton « Exporter le registre
+   Excel » pour le sauvegarder sur le disque.
+
+## Détails techniques
+
+- Un fichier Office (docx/xlsx/pptx) est une archive ZIP de XML : l'application embarque
+  son propre **lecteur/écrivain ZIP** (sans aucune bibliothèque externe) et lit/écrit
+  directement les parties XML concernées (`word/document.xml`, `ppt/slides/slideN.xml`,
+  `xl/sharedStrings.xml`, en-têtes/pieds de page, notes, etc.).
+- Les balises sont recherchées dans le **texte concaténé** de chaque partie, ce qui gère
+  les balises découpées en plusieurs « runs » par Word ; le remplacement est reporté dans
+  les bons nœuds XML en conservant la mise en forme du document.
+- Le titre est écrit dans `docProps/core.xml` (propriété `dc:title`).
+- Le registre Excel est un vrai fichier `.xlsx` généré et lu entièrement en local.
+- Aucune donnée ne quitte le navigateur : aucune requête réseau n'est émise.
+
+## Prérequis
+
+- Un navigateur moderne (Chrome, Edge, Firefox, Safari récents).
+- L'enregistrement « à l'emplacement choisi » utilise l'API File System Access quand elle
+  est disponible ; sinon un téléchargement classique est proposé.
+
+## Dépôt
+
+Le projet est versionné avec git (commits incrémentaux par version propre) :
+`index.html` (l'application) et `README.md` (cette documentation).

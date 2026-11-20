@@ -208,6 +208,7 @@ summary{cursor:pointer;font-size:12px;color:var(--muted)}
 const state = {
   params: { prefixe: 'GD' },   // préfixe des documents générés (paramètre application)
   seq: 1,                       // compteur pour les codes uniques
+  chrono: 1,                    // compteur chrono pour la balise réservée [CHRONO]
   trames: [],                   // {id, name, kind, bytes, tags, counts, importedAt, updatedAt}
   modeles: [],                  // {id, trameId, name, values:{balise:valeur}, createdAt}
   documents: []                 // {code, prefixe, titre, fileName, sourceType, sourceId, sourceName, values, date}
@@ -350,6 +351,26 @@ function collectSegments(xml, re){
 }
 const TAG_RE=/\[([^\[\]\n]{1,200})\]/g;
 
+/* ---------- balises découpées en plages : [XX-n] ou [XX-n-m] ----------
+   On ne détecte que la balise de base XX ; le remplacement ne porte que
+   sur le n-ième caractère (1-based) ou les caractères n à m de la valeur. */
+function parseTagInner(inner){
+  const t=inner.trim();
+  const m=t.match(/^(.+?)-(\d+)(?:-(\d+))?$/);
+  if(!m) return { base:t, n:null, m:null };
+  const n=parseInt(m[2],10), mm=m[3]?parseInt(m[3],10):null;
+  if(!m[1].trim() || n<1 || (mm!==null && mm<n)) return { base:t, n:null, m:null }; // pas une plage valide -> balise normale
+  return { base:m[1].trim(), n, m:mm };
+}
+/** Valeur découpée : caractère n (1-based) ou caractères n..m de v */
+function sliceValue(v, n, m){
+  const s=String(v);
+  if(n-1>=s.length) return '';
+  return s.substring(n-1, m==null? n : m);
+}
+/** Balise réservée [CHRONO] : valeur générée automatiquement, jamais saisie */
+function isReservedTag(tag){ return String(tag).trim().toLowerCase()==='chrono'; }
+
 /** Détecte les balises [..] d'un fichier Office -> {tags, counts, parts} */
 async function detectTagsInBytes(kind, u8){
   const zip=await zipRead(u8 instanceof Uint8Array ? u8 : new Uint8Array(u8));
@@ -357,17 +378,23 @@ async function detectTagsInBytes(kind, u8){
 }
 function detectTagsInZip(kind, zip){
   const re=partRegex(kind);
-  const all=[], counts={}, parts=textPartsOf(kind, [...zip.keys()]);
+  const all=[], counts={}, slices={}, minChars={}, parts=textPartsOf(kind, [...zip.keys()]);
   for(const p of parts){
     if(!zip.has(p)) continue;
     const { combined }=collectSegments(dec(zip.get(p)), re);
     TAG_RE.lastIndex=0; let m;
     while((m=TAG_RE.exec(combined))!==null){
-      const t=m[1].trim(); if(!t) continue;
+      const parsed=parseTagInner(m[1]);
+      const t=parsed.base; if(!t) continue;
       counts[t]=(counts[t]||0)+1; if(!all.includes(t)) all.push(t);
+      if(parsed.n!==null){
+        (slices[t]=slices[t]||[]).push({ n:parsed.n, m:parsed.m });
+        const max=parsed.m==null? parsed.n : parsed.m;
+        minChars[t]=Math.max(minChars[t]||0, max);
+      }
     }
   }
-  return { tags:all, counts, parts };
+  return { tags:all, counts, slices, minChars, parts };
 }
 
 /** Remplace dans une partie XML les balises dont la valeur est fournie.
@@ -377,8 +404,13 @@ function applyValuesToPart(xml, re, values){
   TAG_RE.lastIndex=0;
   const matches=[]; let m;
   while((m=TAG_RE.exec(combined))!==null){
-    const key=m[1].trim().toLowerCase();
-    if(values.has(key)) matches.push({ start:m.index, end:m.index+m[0].length, value:values.get(key) });
+    const parsed=parseTagInner(m[1]);
+    const key=parsed.base.toLowerCase();
+    if(values.has(key)){
+      const v=values.get(key);
+      const repl=(parsed.n==null)? v : sliceValue(v, parsed.n, parsed.m);
+      matches.push({ start:m.index, end:m.index+m[0].length, value:repl });
+    }
   }
   matches.sort((a,b)=>b.start-a.start);
   const texts=segs.map(s=>s.text);
@@ -434,6 +466,13 @@ function nextCode(st){
   st.seq++;
   return code;
 }
+/** Numéro chrono (balise réservée [CHRONO]) : compteur persistant, ex. 000007 */
+function nextChrono(st){
+  const v=String(st.chrono).padStart(6,'0');
+  st.chrono++;
+  return v;
+}
+function peekChrono(st){ return String((st||state).chrono).padStart(6,'0'); }
 
 /* ============================================================
    REGISTRE EXCEL (xlsx) : l'état complet de l'application,
@@ -562,16 +601,19 @@ function registreSheets(st){
     ['Paramètre','Valeur'],
     ['Préfixe des documents', st.params.prefixe],
     ['Compteur de codes (prochain)', String(st.seq)],
+    ['Compteur chrono (prochain)', String(st.chrono||1)],
     ['Nombre de trames', String(st.trames.length)],
     ['Nombre de modèles', String(st.modeles.length)],
     ['Nombre de documents générés', String(st.documents.length)],
     ['Exporté le', new Date().toLocaleString('fr-FR')]
   ];
+  const plagesTxt=t=>t.tags.filter(g=>(t.slices&&t.slices[g]||[]).length)
+    .map(g=>g+': '+t.slices[g].map(s=>s.m==null?String(s.n):s.n+'-'+s.m).join(', ')).join(' ; ');
   const trames=[
-    ['ID','Nom du fichier','Type','Nb balises','Balises détectées','Importée le','Mise à jour le']
+    ['ID','Nom du fichier','Type','Nb balises','Balises détectées','Plages (balises découpées)','Importée le','Mise à jour le']
   ].concat(st.trames.map(t=>[
     t.id, t.name, t.kind.toUpperCase(), String(t.tags.length),
-    t.tags.map(g=>'['+g+']').join(' '), fmtDate(t.importedAt), fmtDate(t.updatedAt)
+    t.tags.map(g=>'['+g+']').join(' '), plagesTxt(t)||'—', fmtDate(t.importedAt), fmtDate(t.updatedAt)
   ]));
   const modeles=[
     ['ID','Trame (ID)','Nom du modèle','Valeurs des balises (JSON)','Créé le']
@@ -580,10 +622,11 @@ function registreSheets(st){
     return [mo.id, (tr?tr.name+' ('+mo.trameId+')':mo.trameId), mo.name, JSON.stringify(mo.values), fmtDate(mo.createdAt)];
   }));
   const documents=[
-    ['Code','Préfixe','Titre','Nom du fichier','Source','Valeurs utilisées (JSON)','Généré le']
+    ['Code','Préfixe','Titre','Nom du fichier','Source','Chrono','Valeurs utilisées (JSON)','Généré le']
   ].concat(st.documents.map(d=>[
     d.code, d.prefixe, d.titre, d.fileName,
     (d.sourceType==='modele'?'Modèle ':'Trame ')+d.sourceName,
+    d.chrono||'—',
     JSON.stringify(d.values), fmtDate(d.date)
   ]));
   const fichiers=[
@@ -604,28 +647,41 @@ function rowToObj(header, row){ const o={}; header.forEach((h,i)=>{ o[h]=row[i]|
 async function importRegister(st, u8){
   const sheets=await parseXlsx(u8);
   const get=name=>sheets[name]||sheets[sanitizeSheetName(name)]||[];
-  const st2={ params:{ prefixe:'GD' }, seq:1, trames:[], modeles:[], documents:[] };
+  const st2={ params:{ prefixe:'GD' }, seq:1, chrono:1, trames:[], modeles:[], documents:[] };
   // Paramètres
   const pr=get('Paramètres');
   if(pr.length>1){
     pr.slice(1).forEach(r=>{ const o=rowToObj(pr[0],r);
       if(o['Paramètre']==='Préfixe des documents' && o['Valeur']) st2.params.prefixe=o['Valeur'];
       if(o['Paramètre']==='Compteur de codes (prochain)'){ const n=parseInt(o['Valeur'],10); if(!isNaN(n)) st2.seq=n; }
+      if(o['Paramètre']==='Compteur chrono (prochain)'){ const n=parseInt(o['Valeur'],10); if(!isNaN(n)) st2.chrono=n; }
     });
   }
   // Fichiers (base64) -> map id -> bytes
   const fichiers={};
   const fi=get('Fichiers');
   if(fi.length>1) fi.slice(1).forEach(r=>{ const o=rowToObj(fi[0],r); if(o['ID trame']&&o['Contenu (base64)']) fichiers[o['ID trame']]=b64ToU8(o['Contenu (base64)']); });
-  // Trames
+  // Trames (la détection des balises/plages est recalculée depuis le fichier restauré)
   const tr=get('Trames');
-  if(tr.length>1) tr.slice(1).forEach(r=>{ const o=rowToObj(tr[0],r);
-    if(!o['ID']) return;
-    const balises=(o['Balises détectées']||'').split(/\s+/).filter(s=>s.startsWith('[')&&s.endsWith(']')).map(s=>s.slice(1,-1));
-    st2.trames.push({ id:o['ID'], name:o['Nom du fichier']||'trame', kind:(o['Type']||'DOCX').toLowerCase(),
-      bytes:fichiers[o['ID']]||new Uint8Array(0), tags:balises, counts:{},
-      importedAt:o['Importée le']||null, updatedAt:o['Mise à jour le']||null });
-  });
+  if(tr.length>1){
+    for(const r of tr.slice(1)){
+      const o=rowToObj(tr[0],r);
+      if(!o['ID']) continue;
+      const kind=(o['Type']||'DOCX').toLowerCase();
+      const bytes=fichiers[o['ID']]||new Uint8Array(0);
+      let tags=[], counts={}, slices={}, minChars={};
+      if(bytes.length){
+        try{
+          const det=detectTagsInZip(kind, await zipRead(bytes));
+          tags=det.tags; counts=det.counts; slices=det.slices; minChars=det.minChars;
+        }catch(e){ /* repli sur la colonne 'Balises détectées' */ }
+      }
+      if(!tags.length)
+        tags=(o['Balises détectées']||'').split(/\s+/).filter(s=>s.startsWith('[')&&s.endsWith(']')).map(s=>s.slice(1,-1));
+      st2.trames.push({ id:o['ID'], name:o['Nom du fichier']||'trame', kind, bytes, tags, counts, slices, minChars,
+        importedAt:o['Importée le']||null, updatedAt:o['Mise à jour le']||null });
+    }
+  }
   // Modèles
   const mo=get('Modèles');
   if(mo.length>1) mo.slice(1).forEach(r=>{ const o=rowToObj(mo[0],r);
@@ -641,10 +697,10 @@ async function importRegister(st, u8){
     let values={}; try{ values=JSON.parse(o['Valeurs utilisées (JSON)']||'{}'); }catch(e){}
     const src=(o['Source']||'').replace(/^(Modèle|Trame)\s/,'')||'';
     st2.documents.push({ code:o['Code'], prefixe:o['Préfixe']||'', titre:o['Titre']||'', fileName:o['Nom du fichier']||'',
-      sourceType:/^Modèle/i.test(o['Source']||'')?'modele':'trame', sourceId:'', sourceName:src, values, date:o['Généré le']||null });
+      sourceType:/^Modèle/i.test(o['Source']||'')?'modele':'trame', sourceId:'', sourceName:src, chrono:o['Chrono']||'', values, date:o['Généré le']||null });
   });
   // remplace l'état courant
-  st.params=st2.params; st.seq=st2.seq; st.trames=st2.trames; st.modeles=st2.modeles; st.documents=st2.documents;
+  st.params=st2.params; st.seq=st2.seq; st.chrono=st2.chrono; st.trames=st2.trames; st.modeles=st2.modeles; st.documents=st2.documents;
   return st2;
 }
 
@@ -756,6 +812,7 @@ async function importTrames(files){
       const buf=await f.arrayBuffer();
       const det=await detectTagsInBytes(kind, new Uint8Array(buf));
       state.trames.push({ id:uid(), name:f.name, kind, bytes:buf, tags:det.tags, counts:det.counts,
+        slices:det.slices||{}, minChars:det.minChars||{},
         importedAt:new Date().toISOString(), updatedAt:null });
       importes.push(f.name+' → '+(det.tags.length? det.tags.length+' balise(s) : '+det.tags.map(t=>'['+t+']').join(', ') : 'aucune balise détectée'));
     }catch(e){ rejetes.push(f.name+' ('+e.message+')'); }
@@ -784,6 +841,7 @@ function demanderMiseAJourTrame(trame){
         throw new Error('rétro-compatibilité rompue : balise(s) manquante(s) '+manquantes.map(t=>'['+t+']').join(', '));
       const nouvelles=det.tags.filter(t=>!anciennes.includes(t));
       trame.name=f.name; trame.bytes=buf; trame.tags=det.tags; trame.counts=det.counts;
+      trame.slices=det.slices||{}; trame.minChars=det.minChars||{};
       trame.updatedAt=new Date().toISOString();
       message(msg,'ok','Trame « '+trame.name+' » mise à jour ('+det.tags.length+' balise(s))'+(nouvelles.length?', nouvelles balises : '+nouvelles.map(t=>'['+t+']').join(', '):', aucune balise ajoutée')+'. Les modèles existants restent valides.');
       renderAll();
@@ -792,11 +850,28 @@ function demanderMiseAJourTrame(trame){
   input.click();
 }
 
+/* texte des plages d'une balise découpée, ex. "2, 3-5" */
+function plageText(tag, slices){
+  const arr=(slices&&slices[tag])||[];
+  return arr.map(s=> s.m==null? String(s.n) : s.n+'-'+s.m).join(', ');
+}
+function minCharsText(tr, tag){
+  const mc=(tr.minChars&&tr.minChars[tag])||0;
+  return mc? 'valeur d’au moins '+mc+' caractère(s)' : '';
+}
 function voirBalises(tr){
   const corps=el('div');
   if(tr.tags.length){
     const ul=el('ul');
-    for(const g of tr.tags) ul.appendChild(el('li',{}, el('span',{class:'balise',text:'['+g+']'}), ' ×'+(tr.counts[g]||1)));
+    for(const g of tr.tags){
+      const li=el('li',{}, el('span',{class:'balise',text:'['+g+']'}), ' ×'+(tr.counts[g]||1));
+      if(isReservedTag(g))
+        li.appendChild(el('div',{class:'note', text:'Balise RÉSERVÉE : remplie automatiquement par le numéro chrono à la génération — jamais saisie dans un modèle ni un document.'}));
+      const pl=plageText(g, tr.slices);
+      if(pl)
+        li.appendChild(el('div',{class:'note', text:'Balises découpées présentes : ['+g+'-n] / ['+g+'-n-m] → plages '+pl+' ('+minCharsText(tr,g)+'). Seuls ces caractères de la valeur seront insérés.'}));
+      ul.appendChild(li);
+    }
     corps.appendChild(ul);
   } else corps.appendChild(el('p',{class:'note',text:'Aucune balise [..] détectée dans ce fichier.'}));
   openModal('Balises de « '+tr.name+' »', corps, [{label:'Fermer', class:'btn'}]);
@@ -823,17 +898,24 @@ function ouvrirModaleModele(trame, modele){
   const nomInput=el('input',{type:'text', value: modele?modele.name:''});
   corps.appendChild(el('div',{class:'champ'}, el('label',{text:'Nom du modèle'}), nomInput));
   const champs={};
-  for(const tag of trame.tags){
+  const aSaisir=trame.tags.filter(t=>!isReservedTag(t));
+  const reservees=trame.tags.filter(isReservedTag);
+  for(const tag of aSaisir){
     const inp=el('input',{type:'text', value: modele?(modele.values[tag]||''):''});
     champs[tag]=inp;
-    corps.appendChild(el('div',{class:'champ'}, el('label',{text:'Balise ['+tag+']'}), inp));
+    const champ=el('div',{class:'champ'}, el('label',{text:'Balise ['+tag+']'}), inp);
+    const pl=plageText(tag, trame.slices);
+    if(pl) champ.appendChild(el('div',{class:'note', text:'Plages utilisées dans la trame : '+pl+' → renseignez la valeur complète ('+minCharsText(trame,tag)+').'}));
+    corps.appendChild(champ);
   }
+  if(reservees.length)
+    corps.appendChild(el('p',{class:'note', text:'Balise(s) réservée(s) '+reservees.map(g=>'['+g+']').join(', ')+' : jamais saisies ici — le numéro chrono est généré automatiquement à la génération du document.'}));
   corps.appendChild(el('p',{class:'note', text:'Laissez un champ vide : la balise correspondante restera à compléter lors de la génération d\'un document.'}));
   openModal(modele?'Modifier le modèle « '+modele.name+' »':'Créer un modèle depuis la trame « '+trame.name+' »', corps, [
     {label:'Annuler', class:'btn'},
     {label: modele?'Enregistrer les modifications':'Créer le modèle', primary:true, onClick:()=>{
       const name=nomInput.value.trim()||'Modèle sans nom';
-      const values={}; for(const tag of trame.tags) values[tag]=champs[tag].value;
+      const values={}; for(const tag of aSaisir) values[tag]=champs[tag].value;
       if(modele){ modele.name=name; modele.values=values; }
       else state.modeles.push({ id:uid(), trameId:trame.id, name, values, createdAt:new Date().toISOString() });
       renderAll();
@@ -863,14 +945,20 @@ function ouvrirGeneration(trame, modele){
   const corps=el('div');
   const zoneMsg=el('div'); corps.appendChild(zoneMsg);
   corps.appendChild(el('p',{class:'note', text:'Source : '+(modele?'modèle « '+modele.name+' » (trame « '+trame.name+' »)':'trame « '+trame.name+' »')+'. Préfixe : « '+(state.params.prefixe||'GD')+' » — prochain code : '+peekCode()+'.'}));
+  const hasChrono=trame.tags.some(isReservedTag);
+  if(hasChrono)
+    corps.appendChild(el('p',{class:'note', text:'La balise réservée [CHRONO] sera remplie automatiquement avec le prochain numéro chrono : '+peekChrono(state)+' (jamais saisie).'}));
   const titreInput=el('input',{type:'text', value:(modele&&tagTitre&&modele.values[tagTitre])||''});
   corps.appendChild(el('div',{class:'champ'}, el('label',{text:'Titre du document — équivalent de la balise ['+(tagTitre||'TITRE')+'] ; écrit dans la propriété « Titre » du fichier et dans son nom'}), titreInput));
   const champs={};
   for(const tag of trame.tags){
-    if(tag.toLowerCase()==='titre') continue;
+    if(tag.toLowerCase()==='titre' || isReservedTag(tag)) continue;
     const inp=el('input',{type:'text', value: modele?(modele.values[tag]||''):''});
     champs[tag]=inp;
-    corps.appendChild(el('div',{class:'champ'}, el('label',{text:'['+tag+']'}), inp));
+    const champ=el('div',{class:'champ'}, el('label',{text:'['+tag+']'}), inp);
+    const pl=plageText(tag, trame.slices);
+    if(pl) champ.appendChild(el('div',{class:'note', text:'Plages utilisées dans la trame : '+pl+' → saisissez la valeur complète ('+minCharsText(trame,tag)+') ; seuls les caractères des plages seront insérés.'}));
+    corps.appendChild(champ);
   }
   if(trame.tags.length) corps.appendChild(el('p',{class:'note', text:'Les balises laissées vides restent telles quelles dans le document généré.'}));
   openModal('Générer un document', corps, [
@@ -880,21 +968,33 @@ function ouvrirGeneration(trame, modele){
       if(!titre){ message(zoneMsg,'err','Veuillez saisir le titre du document.'); titreInput.focus(); return; }
       const values=new Map();
       for(const tag of trame.tags){
+        if(isReservedTag(tag)) continue;                       // [CHRONO] : jamais saisie
         const v=(tag.toLowerCase()==='titre')?titre:(champs[tag]?champs[tag].value:'');
         if(v!=='') values.set(tag.toLowerCase(), v);
       }
+      let chronoVal=null;
+      if(hasChrono){ chronoVal=nextChrono(state); values.set('chrono', chronoVal); }
+      // informe des plages : avertit si une valeur est plus courte que le minimum requis
+      const warnings=[];
+      for(const tag of trame.tags){
+        const v=values.get(tag.toLowerCase());
+        const mc=(trame.minChars&&trame.minChars[tag])||0;
+        if(v!=null && mc && String(v).length<mc)
+          warnings.push('['+tag+'] : '+String(v).length+' caractère(s) saisi(s) pour un minimum de '+mc+' (plages '+plageText(tag,trame.slices)+') — les caractères manquants seront vides');
+      }
+      if(warnings.length) message(zoneMsg,'warn','Attention — '+warnings.join(' ; '));
       try{
         const bytes=await generateDocument(trame, values, titre);
         const prefixe=state.params.prefixe||'GD';
         const code=nextCode(state);
         const fileName=docFileName(prefixe, code, titre, trame.kind);
-        state.documents.push({ code, prefixe, titre, fileName,
+        state.documents.push({ code, prefixe, titre, fileName, chrono:chronoVal,
           sourceType: modele?'modele':'trame', sourceId: modele?modele.id:trame.id,
           sourceName: modele?modele.name:trame.name,
           values:Object.fromEntries([...values].map(([k,v])=>[k,v])), date:new Date().toISOString() });
         renderAll();
         const res=await saveBytes(bytes, fileName, MIMES[trame.kind]);
-        if(res) message($('#msgTrames'),'ok', res+' — code unique : '+code+'.');
+        if(res) message($('#msgTrames'),'ok', res+' — code unique : '+code+(chronoVal?' — chrono : '+chronoVal:'')+'.');
         close();
       }catch(e){ message(zoneMsg,'err','Génération impossible : '+e.message); }
     }}
@@ -1212,7 +1312,15 @@ function renderTrames(){
     row.addEventListener('click',()=>{ ui.selTrame=tr.id; renderAll(); });
     row.addEventListener('dblclick',()=>ouvrirGeneration(tr,null));
     const balises=el('span');
-    if(tr.tags.length) for(const g of tr.tags) balises.appendChild(el('span',{class:'balise',text:'['+g+']'}));
+    if(tr.tags.length) for(const g of tr.tags){
+      const chip=el('span',{class:'balise',text:'['+g+']'});
+      const infos=[];
+      const pl=plageText(g, tr.slices);
+      if(pl) infos.push('plages '+pl+' ('+minCharsText(tr,g)+')');
+      if(isReservedTag(g)) infos.push('réservée : numéro chrono auto');
+      if(infos.length) chip.title=infos.join(' | ');
+      balises.appendChild(chip);
+    }
     else balises.appendChild(el('span',{class:'note',text:'(aucune balise)'}));
     row.appendChild(el('td',{text:tr.name}));
     row.appendChild(el('td',{text:tr.kind.toUpperCase()}));
@@ -1251,7 +1359,7 @@ function renderDocuments(){
   const c=$('#listeDocuments');
   if(!state.documents.length){ c.innerHTML='<div class="vide">Aucun document généré pour le moment.</div>'; return; }
   const t=el('table',{class:'grid'});
-  t.appendChild(el('tr',{}, ...['Code','Nom du fichier','Titre','Source','Généré le'].map(h=>el('th',{text:h}))));
+  t.appendChild(el('tr',{}, ...['Code','Nom du fichier','Titre','Source','Chrono','Généré le'].map(h=>el('th',{text:h}))));
   for(const d of state.documents){
     const row=el('tr',{'data-id':d.code, class: ui.selDocument===d.code?'selected':''});
     row.addEventListener('click',()=>{ ui.selDocument=d.code; renderAll(); });
@@ -1260,6 +1368,7 @@ function renderDocuments(){
     row.appendChild(el('td',{text:d.fileName}));
     row.appendChild(el('td',{text:d.titre}));
     row.appendChild(el('td',{text:(d.sourceType==='modele'?'Modèle ':'Trame ')+d.sourceName}));
+    row.appendChild(el('td',{}, d.chrono? el('code',{text:d.chrono}) : '—'));
     row.appendChild(el('td',{text:fmtDate(d.date)}));
     t.appendChild(row);
   }
@@ -1337,6 +1446,32 @@ const DOC_MD = [
 '- **Document généré** : obtenu à partir d\'un modèle (valeurs pré-remplies) ou directement',
 '  d\'une trame, en complétant les balises restantes. L\'application propose alors',
 '  **d\'enregistrer le document** à l\'emplacement de votre choix.',
+'',
+'## Balises découpées en plages de caractères',
+'',
+'Si une trame contient une balise de la forme `[XX-n]` ou `[XX-n-m]`, l\'application ne',
+'détecte que la **balise de base `XX`** : la valeur saisie pour `XX` (dans le modèle ou à',
+'la génération) est fournie en entier, et seules les positions demandées sont insérées :',
+'',
+'- `[XX-n]` → remplacé par le **n-ième caractère** de la valeur (en commençant à 1) ;',
+'- `[XX-n-m]` → remplacé par les **caractères n à m** de la valeur (toujours en commençant à 1).',
+'',
+'Exemple : valeur `XX = "ABCDE"` → `[XX-2]` donne `B`, `[XX-2-4]` donne `BCD`.',
+'L\'application **informe des plages présentes dans la trame** (fenêtre « Balises », infobulle',
+'des balises dans le tableau, et aide dans les formulaires de modèle/génération), notamment',
+'le **nombre minimum de caractères** attendu pour chaque balise découpée. Si la valeur saisie',
+'est plus courte, un avertissement est affiché (les caractères manquants sont remplacés par',
+'du vide).',
+'',
+'## Balise réservée [CHRONO]',
+'',
+'La balise `chrono` (peu importe la casse) est **réservée** : sa valeur est le **numéro chrono**',
+'généré automatiquement par l\'application (compteur persistant, ex. `000007`, enregistré dans',
+'le registre). Il est **interdit de saisir sa valeur** dans un modèle ou un document à générer :',
+'le champ n\'est jamais proposé, et à chaque génération d\'un document, un nouveau numéro chrono',
+'est attribué et toutes les occurrences `[CHRONO]` (y compris découpées, ex. `[CHRONO-2]`) sont',
+'remplies avec cette valeur. Le numéro chrono utilisé figure dans la liste des documents générés',
+'(colonne « Chrono ») et dans le registre Excel.',
 '',
 '## Nommage et identité des documents générés',
 '',
@@ -1437,7 +1572,8 @@ function initUI(){
 /* ---------- exposition pour tests / debug ---------- */
 globalThis.GD = { state, crc32, zipWrite, zipRead, officeKind, textPartsOf, detectTagsInBytes,
   detectTagsInZip, applyValuesToPart, setCoreTitle, generateDocument, sanitizeFileName,
-  docFileName, nextCode, esc, decXml, u8ToB64, b64ToU8, buildXlsx, parseXlsx,
+  docFileName, nextCode, nextChrono, peekChrono, parseTagInner, sliceValue, isReservedTag,
+  esc, decXml, u8ToB64, b64ToU8, buildXlsx, parseXlsx,
   registreSheets, buildRegister, importRegister, balisesManquantes, MIMES, DOC_MD };
 
 if (typeof document !== 'undefined') {

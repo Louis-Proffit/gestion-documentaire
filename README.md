@@ -43,6 +43,32 @@ navigateur, ou téléchargement selon le navigateur).
   d'une trame, en complétant les balises restantes. L'application propose alors
   **d'enregistrer le document** à l'emplacement de votre choix.
 
+## Balises découpées en plages de caractères
+
+Si une trame contient une balise de la forme `[XX-n]` ou `[XX-n-m]`, l'application ne
+détecte que la **balise de base `XX`** : la valeur saisie pour `XX` (dans le modèle ou à
+la génération) est fournie en entier, et seules les positions demandées sont insérées :
+
+- `[XX-n]` → remplacé par le **n-ième caractère** de la valeur (en commençant à 1) ;
+- `[XX-n-m]` → remplacé par les **caractères n à m** de la valeur (toujours en commençant à 1).
+
+Exemple : valeur `XX = "ABCDE"` → `[XX-2]` donne `B`, `[XX-2-4]` donne `BCD`.
+L'application **informe des plages présentes dans la trame** (fenêtre « Balises », infobulle
+des balises dans le tableau, et aide dans les formulaires de modèle/génération), notamment
+le **nombre minimum de caractères** attendu pour chaque balise découpée. Si la valeur saisie
+est plus courte, un avertissement est affiché (les caractères manquants sont remplacés par
+du vide).
+
+## Balise réservée [CHRONO]
+
+La balise `chrono` (peu importe la casse) est **réservée** : sa valeur est le **numéro chrono**
+généré automatiquement par l'application (compteur persistant, ex. `000007`, enregistré dans
+le registre). Il est **interdit de saisir sa valeur** dans un modèle ou un document à générer :
+le champ n'est jamais proposé, et à chaque génération d'un document, un nouveau numéro chrono
+est attribué et toutes les occurrences `[CHRONO]` (y compris découpées, ex. `[CHRONO-2]`) sont
+remplies avec cette valeur. Le numéro chrono utilisé figure dans la liste des documents générés
+(colonne « Chrono ») et dans le registre Excel.
+
 ## Nommage et identité des documents générés
 
 - Chaque document reçoit un **code unique** de la forme `AAAA-NNNN` (année + compteur

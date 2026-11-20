@@ -360,12 +360,226 @@ function nextCode(st){
   return code;
 }
 
+/* ============================================================
+   REGISTRE EXCEL (xlsx) : l'état complet de l'application,
+   y compris les fichiers de trames, est conservé sous forme
+   de tableau Excel, consultable dans l'app et exportable.
+   ============================================================ */
+function colName(i){ let s=''; i++; while(i>0){ const r=(i-1)%26; s=String.fromCharCode(65+r)+s; i=Math.floor((i-1)/26); } return s; }
+function sanitizeSheetName(n){ return String(n).replace(/[\\\/\?\*\[\]:]/g,'-').slice(0,31) || 'Feuille'; }
+
+function sheetXml(rows){
+  let x='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+  rows.forEach((row,r)=>{
+    x+='<row r="'+(r+1)+'">';
+    row.forEach((c,i)=>{
+      if(c===null||c===undefined||c==='') return;
+      x+='<c r="'+colName(i)+(r+1)+'" t="inlineStr"><is><t xml:space="preserve">'+esc(String(c))+'</t></is></c>';
+    });
+    x+='</row>';
+  });
+  return x+'</sheetData></worksheet>';
+}
+
+/** sheets: [{name, rows:[[cell,...],...]}] -> Uint8Array (fichier .xlsx valide) */
+function buildXlsx(sheets){
+  const ct=['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>',
+    '<Default Extension="xml" ContentType="application/xml"/>',
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'];
+  const rels=['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">',
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'];
+  const wb=['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+    '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'];
+  const wbrels=['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'];
+  sheets.forEach((s,i)=>{
+    ct.push('<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>');
+    wb.push('<sheet name="'+escAttr(sanitizeSheetName(s.name))+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>');
+    wbrels.push('<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>');
+  });
+  ct.push('<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>');
+  wb.push('</sheets></workbook>');
+  wbrels.push('</Relationships>');
+  const styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    '<fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>'+
+    '<fills count="1"><fill><patternFill patternType="none"/></fill></fills>'+
+    '<borders count="1"><border/></borders>'+
+    '<cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="1"><xf/></cellXfs></styleSheet>';
+  const entries=[
+    {name:'[Content_Types].xml', data:enc(ct.join(''))},
+    {name:'_rels/.rels', data:enc(rels.join(''))},
+    {name:'xl/workbook.xml', data:enc(wb.join(''))},
+    {name:'xl/_rels/workbook.xml.rels', data:enc(wbrels.join(''))},
+    {name:'xl/styles.xml', data:enc(styles)}
+  ];
+  sheets.forEach((s,i)=>entries.push({name:'xl/worksheets/sheet'+(i+1)+'.xml', data:enc(sheetXml(s.rows))}));
+  return zipWrite(entries);
+}
+
+/** Lit un .xlsx -> { nomFeuille: [[cellule,...],...] } (inlineStr + sharedStrings) */
+async function parseXlsx(u8){
+  const zip=await zipRead(u8 instanceof Uint8Array ? u8 : new Uint8Array(u8));
+  const shared=[];
+  if(zip.has('xl/sharedStrings.xml')){
+    const xml=dec(zip.get('xl/sharedStrings.xml'));
+    const re=/<si>([\s\S]*?)<\/si>/g; let m;
+    while((m=re.exec(xml))!==null){
+      const tre=/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g; let t='', mm;
+      while((mm=tre.exec(m[1]))!==null) t+=decXml(mm[1]);
+      shared.push(t);
+    }
+  }
+  const wbXml=zip.has('xl/workbook.xml')?dec(zip.get('xl/workbook.xml')):'';
+  const relsXml=zip.has('xl/_rels/workbook.xml.rels')?dec(zip.get('xl/_rels/workbook.xml.rels')):'';
+  const relMap={};
+  { const re=/<Relationship[^>]*>/g; let m;
+    while((m=re.exec(relsXml))!==null){
+      const id=(m[0].match(/Id="([^"]+)"/)||[])[1], tgt=(m[0].match(/Target="([^"]+)"/)||[])[1];
+      if(id&&tgt) relMap[id]=tgt;
+    } }
+  const sheets=[];
+  { const re=/<sheet\s[^>]*\/?>/g; let m;
+    while((m=re.exec(wbXml))!==null){
+      const name=decXml((m[0].match(/name="([^"]*)"/)||[])[1]||'');
+      const rid=(m[0].match(/r:id="([^"]+)"/)||[])[1];
+      let target=relMap[rid]||'';
+      if(target && !/^(\/|xl\/)/.test(target)) target='xl/'+target;
+      target=target.replace(/^\//,'');
+      sheets.push({name, part:target});
+    } }
+  const out={};
+  for(const s of sheets){
+    if(!s.part || !zip.has(s.part)){ out[s.name]=[]; continue; }
+    const xml=dec(zip.get(s.part));
+    const rows=[];
+    const rowRe=/<row[^>]*>([\s\S]*?)<\/row>/g; let rm;
+    while((rm=rowRe.exec(xml))!==null){
+      const cells=[];
+      const cellRe=/<c((?:\s[^>]*)?)>([\s\S]*?)<\/c>|<c((?:\s[^>]*)?)\/>/g; let cm;
+      while((cm=cellRe.exec(rm[1]))!==null){
+        const attrs=cm[1]||cm[3]||'', inner=cm[2]||'';
+        const t=(attrs.match(/t="([^"]+)"/)||[])[1]||'';
+        let val='';
+        if(t==='inlineStr'){ const mm=inner.match(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/); val=mm?decXml(mm[1]):''; }
+        else { const vm=inner.match(/<v>([\s\S]*?)<\/v>/); const v=vm?vm[1]:''; val=(t==='s')?(shared[parseInt(v,10)]||''):decXml(v); }
+        const r=(attrs.match(/r="([A-Z]+)(\d+)"/)||[]);
+        let col=0; if(r[1]){ for(const ch of r[1]) col=col*26+(ch.charCodeAt(0)-64); col--; }
+        cells[col]=val;
+      }
+      const max=cells.reduce((a,c,i)=>c!==undefined?i:a,-1);
+      const row=[]; for(let i=0;i<=max;i++) row.push(cells[i]||'');
+      rows.push(row);
+    }
+    out[s.name]=rows;
+  }
+  return out;
+}
+
+/* ---------- lignes du registre à partir de l'état ---------- */
+function registreSheets(st){
+  const fmtDate=iso=>iso?new Date(iso).toLocaleString('fr-FR'):'-';
+  const params=[
+    ['Paramètre','Valeur'],
+    ['Préfixe des documents', st.params.prefixe],
+    ['Compteur de codes (prochain)', String(st.seq)],
+    ['Nombre de trames', String(st.trames.length)],
+    ['Nombre de modèles', String(st.modeles.length)],
+    ['Nombre de documents générés', String(st.documents.length)],
+    ['Exporté le', new Date().toLocaleString('fr-FR')]
+  ];
+  const trames=[
+    ['ID','Nom du fichier','Type','Nb balises','Balises détectées','Importée le','Mise à jour le']
+  ].concat(st.trames.map(t=>[
+    t.id, t.name, t.kind.toUpperCase(), String(t.tags.length),
+    t.tags.map(g=>'['+g+']').join(' '), fmtDate(t.importedAt), fmtDate(t.updatedAt)
+  ]));
+  const modeles=[
+    ['ID','Trame (ID)','Nom du modèle','Valeurs des balises (JSON)','Créé le']
+  ].concat(st.modeles.map(mo=>{
+    const tr=st.trames.find(t=>t.id===mo.trameId);
+    return [mo.id, (tr?tr.name+' ('+mo.trameId+')':mo.trameId), mo.name, JSON.stringify(mo.values), fmtDate(mo.createdAt)];
+  }));
+  const documents=[
+    ['Code','Préfixe','Titre','Nom du fichier','Source','Valeurs utilisées (JSON)','Généré le']
+  ].concat(st.documents.map(d=>[
+    d.code, d.prefixe, d.titre, d.fileName,
+    (d.sourceType==='modele'?'Modèle ':'Trame ')+d.sourceName,
+    JSON.stringify(d.values), fmtDate(d.date)
+  ]));
+  const fichiers=[
+    ['ID trame','Nom du fichier','Taille (octets)','Contenu (base64)']
+  ].concat(st.trames.map(t=>[t.id, t.name, String(t.bytes instanceof Uint8Array ? t.bytes.length : t.bytes.byteLength), u8ToB64(t.bytes instanceof Uint8Array ? t.bytes : new Uint8Array(t.bytes))]));
+  return [
+    {name:'Paramètres', rows:params},
+    {name:'Trames', rows:trames},
+    {name:'Modèles', rows:modeles},
+    {name:'Documents', rows:documents},
+    {name:'Fichiers', rows:fichiers}
+  ];
+}
+function buildRegister(st){ return buildXlsx(registreSheets(st)); }
+
+/* ---------- restauration de l'état depuis un registre Excel ---------- */
+function rowToObj(header, row){ const o={}; header.forEach((h,i)=>{ o[h]=row[i]||''; }); return o; }
+async function importRegister(st, u8){
+  const sheets=await parseXlsx(u8);
+  const get=name=>sheets[name]||sheets[sanitizeSheetName(name)]||[];
+  const st2={ params:{ prefixe:'GD' }, seq:1, trames:[], modeles:[], documents:[] };
+  // Paramètres
+  const pr=get('Paramètres');
+  if(pr.length>1){
+    pr.slice(1).forEach(r=>{ const o=rowToObj(pr[0],r);
+      if(o['Paramètre']==='Préfixe des documents' && o['Valeur']) st2.params.prefixe=o['Valeur'];
+      if(o['Paramètre']==='Compteur de codes (prochain)'){ const n=parseInt(o['Valeur'],10); if(!isNaN(n)) st2.seq=n; }
+    });
+  }
+  // Fichiers (base64) -> map id -> bytes
+  const fichiers={};
+  const fi=get('Fichiers');
+  if(fi.length>1) fi.slice(1).forEach(r=>{ const o=rowToObj(fi[0],r); if(o['ID trame']&&o['Contenu (base64)']) fichiers[o['ID trame']]=b64ToU8(o['Contenu (base64)']); });
+  // Trames
+  const tr=get('Trames');
+  if(tr.length>1) tr.slice(1).forEach(r=>{ const o=rowToObj(tr[0],r);
+    if(!o['ID']) return;
+    const balises=(o['Balises détectées']||'').split(/\s+/).filter(s=>s.startsWith('[')&&s.endsWith(']')).map(s=>s.slice(1,-1));
+    st2.trames.push({ id:o['ID'], name:o['Nom du fichier']||'trame', kind:(o['Type']||'DOCX').toLowerCase(),
+      bytes:fichiers[o['ID']]||new Uint8Array(0), tags:balises, counts:{},
+      importedAt:o['Importée le']||null, updatedAt:o['Mise à jour le']||null });
+  });
+  // Modèles
+  const mo=get('Modèles');
+  if(mo.length>1) mo.slice(1).forEach(r=>{ const o=rowToObj(mo[0],r);
+    if(!o['ID']) return;
+    let values={}; try{ values=JSON.parse(o['Valeurs des balises (JSON)']||'{}'); }catch(e){}
+    const trameId=(o['Trame (ID)']||'').match(/\(([^)]+)\)\s*$/)?.[1]||o['Trame (ID)'];
+    st2.modeles.push({ id:o['ID'], trameId, name:o['Nom du modèle']||'modèle', values, createdAt:o['Créé le']||null });
+  });
+  // Documents
+  const dc=get('Documents');
+  if(dc.length>1) dc.slice(1).forEach(r=>{ const o=rowToObj(dc[0],r);
+    if(!o['Code']) return;
+    let values={}; try{ values=JSON.parse(o['Valeurs utilisées (JSON)']||'{}'); }catch(e){}
+    const src=(o['Source']||'').replace(/^(Modèle|Trame)\s/,'')||'';
+    st2.documents.push({ code:o['Code'], prefixe:o['Préfixe']||'', titre:o['Titre']||'', fileName:o['Nom du fichier']||'',
+      sourceType:/^Modèle/i.test(o['Source']||'')?'modele':'trame', sourceId:'', sourceName:src, values, date:o['Généré le']||null });
+  });
+  // remplace l'état courant
+  st.params=st2.params; st.seq=st2.seq; st.trames=st2.trames; st.modeles=st2.modeles; st.documents=st2.documents;
+  return st2;
+}
+
 /*@@SUITE@@*/
 
 /* ---------- exposition pour tests / debug ---------- */
 globalThis.GD = { state, crc32, zipWrite, zipRead, officeKind, textPartsOf, detectTagsInBytes,
   detectTagsInZip, applyValuesToPart, setCoreTitle, generateDocument, sanitizeFileName,
-  docFileName, nextCode, esc, decXml, u8ToB64, b64ToU8 };
+  docFileName, nextCode, esc, decXml, u8ToB64, b64ToU8, buildXlsx, parseXlsx,
+  registreSheets, buildRegister, importRegister };
 
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => { if (typeof initUI === 'function') initUI(); });

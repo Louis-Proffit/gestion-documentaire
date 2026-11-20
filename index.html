@@ -19,6 +19,7 @@ code{background:#F0F0F0;padding:1px 5px;border:1px solid var(--border);font-fami
 
 /* ---------- bandeau du haut (façon Office, ludique) ---------- */
 #band{display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,var(--accent-dark),var(--accent) 55%,var(--accent2));color:#fff;padding:0 14px;height:52px;flex:none;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.top-status{margin-left:auto;font-size:11px;opacity:.92;white-space:nowrap}
 .app-icon{width:30px;height:30px;background:#fff;color:var(--accent-dark);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .app-title{font-size:15px;font-weight:600;white-space:nowrap}
 .app-title .ver{font-size:10px;font-weight:400;background:rgba(255,255,255,.22);border-radius:8px;padding:1px 7px;margin-left:5px;vertical-align:2px}
@@ -124,26 +125,33 @@ summary{cursor:pointer;font-size:12px;color:var(--muted)}
 /* ---------- barre d'état ---------- */
 #statusbar{flex:none;min-height:26px;background:#fff;border-top:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:3px 12px;font-size:11px;color:var(--muted)}
 
+/* ---------- barre de mise en forme des champs enrichis ---------- */
+.fmt-bar{display:flex;gap:3px;align-items:center;margin-top:3px}
+.fmt-btn{width:24px;height:22px;font-size:11px;background:#fff;border:1px solid #BFBFBF;border-radius:3px;padding:0}
+.fmt-btn:hover{background:var(--hover);border-color:var(--accent)}
+.fmt-bar input[type=color]{width:26px;height:22px;padding:0;border:1px solid #BFBFBF;border-radius:3px;background:#fff}
+.fmt-bar input[type=number]{height:22px;font-size:11px}
+
 </style>
 </head>
 <body>
 <div id="band">
   <div class="app-icon">GD</div>
-  <div class="app-title">Gestion Documentaire <span class="ver">v1.1</span></div>
+  <div class="app-title">Gestion Documentaire <span class="ver">v1.2</span></div>
   <div class="projet-box">
     <span class="projet-label">Projet :</span>
     <select id="selProjet" title="Projet actif (les types de document et modèles lui appartiennent)"></select>
     <button class="mini" id="btnNouveauProjet" title="Nouveau projet">＋</button>
-    <button class="mini" id="btnGererProjets" title="Gérer les projets (page Paramètres)">⚙</button>
+    <button class="mini" id="btnGererProjets" title="Gérer les projets (page Fichier)">⚙</button>
   </div>
   <nav id="nav">
     <button data-page="accueil" class="active">🏠 Nouveau document</button>
     <button data-page="typedoc">📄 Types de document</button>
     <button data-page="modeles">📋 Modèles</button>
-    <button data-page="documents">🗂 Documents</button>
-    <button data-page="registre">📊 Registre</button>
-    <button data-page="parametres">⚙ Paramètres</button>
+    <button data-page="documents">🗂 Documents & registre</button>
+    <button data-page="fichier">📁 Fichier</button>
   </nav>
+  <span id="topStatus" class="top-status" title="État de la persistance (dossier des trames / registre Excel)"></span>
 </div>
 <div id="bandeau">
   <span class="bandeau-label">📌 Documents générés :</span>
@@ -156,7 +164,7 @@ summary{cursor:pointer;font-size:12px;color:var(--muted)}
   <section class="page" id="page-typedoc">
     <div class="carte">
       <h2>Nouveau type de document</h2>
-      <p class="note">Un <strong>type de document</strong> appartient au projet actif : il a un <strong>nom</strong>, un <strong>trigramme</strong> (3 caractères, ex. <code>CTR</code>) et une <strong>trame</strong> (fichier .docx/.xlsx/.pptx contenant des balises [..]). Le fichier est enregistré dans le dossier des trames (voir Paramètres) et rechargé automatiquement à l'ouverture.</p>
+      <p class="note">Un <strong>type de document</strong> appartient au projet actif : il a un <strong>nom</strong>, un <strong>trigramme</strong> (3 caractères, ex. <code>CTR</code>) et une <strong>trame</strong> (fichier .docx/.xlsx/.pptx contenant des balises [..]). Le fichier est enregistré dans le dossier des trames (voir Fichier) et rechargé automatiquement à l’ouverture.</p>
       <div class="form-row">
         <label for="tdNom">Nom :</label>
         <input type="text" id="tdNom" placeholder="ex. Contrat client" style="width:180px">
@@ -176,7 +184,7 @@ summary{cursor:pointer;font-size:12px;color:var(--muted)}
   <section class="page" id="page-modeles">
     <div class="carte">
       <h2>Modèles du projet</h2>
-      <p class="note">Un <strong>modèle</strong> appartient à un type de document du projet et possède son propre <strong>trigramme</strong> (qui remplace l'ancien préfixe : il est utilisé dans le nom des fichiers générés depuis ce modèle). Tout ou partie des balises y sont fixées.</p>
+      <p class="note">Un <strong>modèle</strong> appartient à un type de document du projet et possède son propre <strong>trigramme</strong> (qui remplace l’ancien préfixe : il est utilisé dans le nom des fichiers générés depuis ce modèle). Tout ou partie des balises y sont fixées — les champs acceptent la <strong>mise en forme enrichie</strong> (barre B I U S + couleur + taille).</p>
       <div class="form-row">
         <label for="moTD">Créer un modèle depuis le type de document :</label>
         <select id="moTD"></select>
@@ -191,11 +199,9 @@ summary{cursor:pointer;font-size:12px;color:var(--muted)}
       <p class="note">Nom de fichier : <code>aaaammjj_projet_typededocument_chrono - Titre du document.ext</code>. Bouton 👁 : lire les valeurs saisies dans chaque balise. La liste est aussi dans le bandeau en haut.</p>
       <div id="listeDocuments"></div>
     </div>
-  </section>
-  <section class="page" id="page-registre">
     <div class="carte">
       <h2>Registre Excel</h2>
-      <p class="note">Feuilles globales (Paramètres, Projets, Types de document, Modèles, Documents, Fichiers) <strong>plus une table par type de document</strong> (feuille « TD &lt;trigramme&gt; ») listant ses documents avec une colonne par balise. Enregistré automatiquement dans le fichier configuré (voir Paramètres).</p>
+      <p class="note">Feuilles globales (Paramètres, Projets, Types de document, Modèles, Documents, Fichiers) <strong>plus une table par type de document</strong> (feuille « TD &lt;trigramme&gt; ») listant ses documents avec une colonne par balise. Enregistré automatiquement dans le fichier configuré (voir Fichier).</p>
       <div class="btnrow">
         <button class="btn" id="btnExporterRegistre">Exporter le registre (.xlsx)…</button>
         <button class="btn" id="btnImporterRegistre">Importer un registre (.xlsx)…</button>
@@ -204,7 +210,7 @@ summary{cursor:pointer;font-size:12px;color:var(--muted)}
       <div id="registreHtml"></div>
     </div>
   </section>
-  <section class="page" id="page-parametres"></section>
+  <section class="page" id="page-fichier"></section>
 </main>
 <div id="statusbar">
   <div id="statusLeft"></div>
@@ -234,7 +240,7 @@ const state = {
   documents: [],                // {code(=chrono), chrono, date, projetId, projetNom, typeDocId, typeDocNom, trigramme, modeleId, modeleNom, titre, fileName, sourceType, sourceId, sourceName, values}
   handles: { dossierTrames:null, registreExcel:null } // FileSystemDirectoryHandle / FileSystemFileHandle (persistance auto)
 };
-const APP_VERSION='1.1';
+const APP_VERSION='1.2';
 
 
 /* ============================================================
@@ -367,10 +373,84 @@ function collectSegments(xml, re){
   while((m=re.exec(xml))!==null){
     const raw=m[2]; if(!raw) continue;
     starts.push(combined.length);
-    segs.push({ xmlStart:m.index+m[1].length, xmlEnd:m.index+m[1].length+raw.length, text:decXml(raw) });
+    segs.push({ xmlStart:m.index+m[1].length, xmlEnd:m.index+m[1].length+raw.length,
+      tagStart:m.index, tagEnd:m.index+m[0].length, text:decXml(raw) });
     combined+=segs[segs.length-1].text;
   }
   return { segs, starts, combined };
+}
+
+/* ---------- champs texte enrichis ----------
+   Marquage dans la valeur : {b} gras, {i} italique, {u} souligné, {s} barré,
+   {c=RRGGBB} couleur, {sz=pt} taille, fermeture {/}.
+   Traduit en vrais runs formatés à la génération :
+   - Word (.docx)      : <w:r><w:rPr>…</w:rPr><w:t>…  ✔
+   - PowerPoint (.pptx): <a:r><a:rPr …/>… ✔
+   - Excel (.xlsx)     : runs <r><rPr>…</rPr><t>… dans les chaînes (sharedStrings / inline) ✔ */
+function parseRichValue(v){
+  const out=[], stack=[{}];
+  const s=String(v==null?'':v);
+  const re=/\{(b|i|u|s)\}|\{c=([0-9A-Fa-f]{6})\}|\{sz=(\d+(?:\.\d+)?)\}|\{\/[a-z]?\}/g;
+  let last=0, m;
+  while((m=re.exec(s))!==null){
+    if(m.index>last) out.push({ text:s.slice(last,m.index), fmt:Object.assign({}, stack[stack.length-1]) });
+    const top=stack[stack.length-1];
+    if(m[1]) stack.push(Object.assign({}, top, {[m[1]]:true}));
+    else if(m[2]) stack.push(Object.assign({}, top, { color:m[2].toUpperCase() }));
+    else if(m[3]) stack.push(Object.assign({}, top, { size:parseFloat(m[3]) }));
+    else if(stack.length>1) stack.pop();
+    last=m.index+m[0].length;
+  }
+  if(last<s.length) out.push({ text:s.slice(last), fmt:Object.assign({}, stack[stack.length-1]) });
+  return out.map(o=>({ text:o.text, fmt:Object.keys(o.fmt).length?o.fmt:null })).filter(o=>o.text!==''||o.fmt);
+}
+function rPrXmlDocx(f){
+  if(!f) return '';
+  const p=[];
+  if(f.b) p.push('<w:b/><w:bCs/>');
+  if(f.i) p.push('<w:i/><w:iCs/>');
+  if(f.s) p.push('<w:strike/>');
+  if(f.color) p.push('<w:color w:val="'+f.color+'"/>');
+  if(f.size){ const h=Math.round(f.size*2); p.push('<w:sz w:val="'+h+'"/><w:szCs w:val="'+h+'"/>'); }
+  if(f.u) p.push('<w:u w:val="single"/>');
+  return '<w:rPr>'+p.join('')+'</w:rPr>';
+}
+function rPrXmlPptx(f){
+  if(!f) return '';
+  const attrs=[];
+  if(f.b) attrs.push('b="1"');
+  if(f.i) attrs.push('i="1"');
+  if(f.u) attrs.push('u="s"');
+  if(f.s) attrs.push('strike="sngStrike"');
+  if(f.size) attrs.push('sz="'+Math.round(f.size*100)+'"');
+  const fill=f.color? '<a:solidFill><a:srgbClr val="'+f.color+'"/></a:solidFill>' : '';
+  return '<a:rPr'+(attrs.length?' '+attrs.join(' '):'')+'>'+fill+'</a:rPr>';
+}
+function rPrXmlXlsx(f){
+  if(!f) return '';
+  const p=[];
+  if(f.b) p.push('<b/>');
+  if(f.i) p.push('<i/>');
+  if(f.s) p.push('<strike/>');
+  if(f.color) p.push('<color rgb="FF'+f.color+'"/>');
+  if(f.size) p.push('<sz val="'+f.size+'"/>');
+  if(f.u) p.push('<u val="s"/>');
+  return '<rPr>'+p.join('')+'</rPr>';
+}
+function runXml(kind, text, fmt){
+  if(kind==='docx') return '<w:r>'+rPrXmlDocx(fmt)+'<w:t xml:space="preserve">'+esc(text)+'</w:t></w:r>';
+  if(kind==='pptx') return '<a:r>'+rPrXmlPptx(fmt)+'<a:t xml:space="preserve">'+esc(text)+'</a:t></a:r>';
+  return esc(text);
+}
+/* bornes du run (<w:r> / <a:r>) contenant un segment de texte */
+function runBounds(xml, kind, seg){
+  const openTag = kind==='docx' ? 'w:r' : 'a:r';
+  const openRe = new RegExp('<'+openTag+'(?:\\s[^>]*)?>','g');
+  let openStart=-1, openEnd=-1, m;
+  while((m=openRe.exec(xml))!==null){ if(m.index+m[0].length<=seg.xmlStart){ openStart=m.index; openEnd=m.index+m[0].length; } else break; }
+  const closeTag='</'+openTag+'>';
+  const cs=xml.indexOf(closeTag, seg.xmlEnd);
+  return { openStart, openEnd, closeEnd: cs<0? seg.xmlEnd : cs+closeTag.length };
 }
 const TAG_RE=/\[([^\[\]\n]{1,200})\]/g;
 
@@ -422,34 +502,73 @@ function detectTagsInZip(kind, zip){
 
 /** Remplace dans une partie XML les balises dont la valeur est fournie.
     values : Map(clé = balise en minuscules -> valeur) */
-function applyValuesToPart(xml, re, values){
+/* Remplace les balises d'une partie XML.
+   values : Map(clé minuscule -> valeur, éventuellement enrichie de marquage {b}{i}{u}{s}{c=}{sz=} ).
+   - valeur simple : remplacement texte dans le nœud d'origine (comme avant) ;
+   - valeur enrichie : insertion de vrais runs formatés (Word w:rPr / PowerPoint a:rPr /
+     Excel runs <r><rPr>), y compris quand la balise est découpée en plusieurs runs. */
+function applyValuesToPart(xml, kind, re, values){
   const { segs, starts, combined }=collectSegments(xml, re);
   TAG_RE.lastIndex=0;
   const matches=[]; let m;
   while((m=TAG_RE.exec(combined))!==null){
     const parsed=parseTagInner(m[1]);
     const key=parsed.base.toLowerCase();
-    if(values.has(key)){
-      const v=values.get(key);
-      const repl=(parsed.n==null)? v : sliceValue(v, parsed.n, parsed.m);
-      matches.push({ start:m.index, end:m.index+m[0].length, value:repl });
-    }
+    if(!values.has(key)) continue;
+    const raw=values.get(key);
+    const repl=(parsed.n==null)? parseRichValue(raw) : parseRichValue(sliceValue(raw, parsed.n, parsed.m));
+    matches.push({ start:m.index, end:m.index+m[0].length, repl });
   }
-  matches.sort((a,b)=>b.start-a.start);
-  const texts=segs.map(s=>s.text);
+  const edits=[];
   for(const mt of matches){
-    let firstIdx=-1;
+    const covering=[];
     for(let i=0;i<segs.length;i++){
       const s0=starts[i], s1=s0+segs[i].text.length;
       if(mt.end<=s0 || mt.start>=s1) continue;
-      if(firstIdx<0) firstIdx=i;
-      const ovS=Math.max(mt.start,s0)-s0, ovE=Math.min(mt.end,s1)-s0;
-      texts[i]=texts[i].slice(0,ovS)+(i===firstIdx?mt.value:'')+texts[i].slice(ovE);
+      covering.push({ i, ovS:Math.max(mt.start,s0)-s0, ovE:Math.min(mt.end,s1)-s0 });
+    }
+    if(!covering.length) continue;
+    const fi=covering[0].i;
+    const rich = mt.repl.length>1 || mt.repl.some(r=>r.fmt);
+    if(!rich){
+      for(const c of covering){
+        const seg=segs[c.i];
+        edits.push({ pos:seg.xmlStart+c.ovS, del:c.ovE-c.ovS, ins: c.i===fi? esc(mt.repl[0]?mt.repl[0].text:'') : '' });
+      }
+      continue;
+    }
+    if(kind==='xlsx'){
+      // remplace tout l'élément <t> du 1er segment par des runs riches (préfixe/suffixe conservés)
+      const seg=segs[fi], c0=covering[0];
+      const prefix=seg.text.slice(0,c0.ovS), suffix=seg.text.slice(c0.ovE);
+      const runs=[];
+      if(prefix) runs.push('<r><t xml:space="preserve">'+esc(prefix)+'</t></r>');
+      for(const r of mt.repl) runs.push('<r>'+rPrXmlXlsx(r.fmt)+'<t xml:space="preserve">'+esc(r.text)+'</t></r>');
+      if(suffix) runs.push('<r><t xml:space="preserve">'+esc(suffix)+'</t></r>');
+      edits.push({ pos:seg.tagStart, del:seg.tagEnd-seg.tagStart, ins:runs.join('') });
+      for(const c of covering){ if(c.i===fi) continue; const s2=segs[c.i]; edits.push({ pos:s2.xmlStart+c.ovS, del:c.ovE-c.ovS, ins:'' }); }
+    } else {
+      // docx / pptx : coupe le run du 1er segment à la position de la balise,
+      // insère les runs formatés, puis rouvre un run (en recopiant le rPr d'origine) pour le suffixe
+      const seg=segs[fi], c0=covering[0];
+      const rTag = kind==='docx' ? 'w:r' : 'a:r';
+      const tTag = kind==='docx' ? 'w:t' : 'a:t';
+      const rprTag = kind==='docx' ? 'w:rPr' : 'a:rPr';
+      const rb=runBounds(xml, kind, seg);
+      let rpr='';
+      if(rb.openEnd>=0 && xml.slice(rb.openEnd).startsWith('<'+rprTag)){
+        const closeIdx=xml.indexOf('</'+rprTag+'>', rb.openEnd);
+        if(closeIdx>=0) rpr=xml.slice(rb.openEnd, closeIdx+rprTag.length+3);
+      }
+      const runsXml=mt.repl.map(r=>runXml(kind, r.text, r.fmt)).join('');
+      const reopen='</'+tTag+'></'+rTag+'>'+runsXml+'<'+rTag+'>'+rpr+'<'+tTag+' xml:space="preserve">';
+      edits.push({ pos:seg.xmlStart+c0.ovS, del:c0.ovE-c0.ovS, ins:reopen });
+      for(const c of covering){ if(c.i===fi) continue; const s2=segs[c.i]; edits.push({ pos:s2.xmlStart+c.ovS, del:c.ovE-c.ovS, ins:'' }); }
     }
   }
-  let out='', pos=0;
-  for(let i=0;i<segs.length;i++){ out+=xml.slice(pos, segs[i].xmlStart)+esc(texts[i]); pos=segs[i].xmlEnd; }
-  out+=xml.slice(pos);
+  edits.sort((a,b)=> b.pos-a.pos || b.del-a.del);
+  let out=xml;
+  for(const e of edits) out=out.slice(0,e.pos)+e.ins+out.slice(e.pos+e.del);
   return out;
 }
 
@@ -469,7 +588,7 @@ async function generateDocument(trame, values, titre){
   const re=partRegex(trame.kind);
   for(const p of textPartsOf(trame.kind, [...zip.keys()])){
     if(!zip.has(p)) continue;
-    zip.set(p, enc(applyValuesToPart(dec(zip.get(p)), re, values)));
+    zip.set(p, enc(applyValuesToPart(dec(zip.get(p)), trame.kind, re, values)));
   }
   if(zip.has('docProps/core.xml'))
     zip.set('docProps/core.xml', enc(setCoreTitle(dec(zip.get('docProps/core.xml')), titre)));
@@ -1131,6 +1250,45 @@ async function ensurePreview(td){
   if(!td._preview){ try{ td._preview=await extractPreviewLines(td); }catch(e){ td._preview=[]; } }
   return td._preview;
 }
+/* ---------- champs texte enrichis : barre de mise en forme ---------- */
+function wrapSelection(input, open, close){
+  const s=input.selectionStart||0, e=input.selectionEnd||0;
+  const v=input.value, sel=v.slice(s,e);
+  input.value=v.slice(0,s)+open+sel+close+v.slice(e);
+  input.selectionStart=s+open.length; input.selectionEnd=s+open.length+sel.length;
+  input.dispatchEvent(new Event('input'));
+}
+function addFmtToolbar(input){
+  const bar=el('div',{class:'fmt-bar'});
+  const mk=(label,title,open)=>{ const b=el('button',{type:'button', class:'fmt-btn', title:title, text:label});
+    b.addEventListener('click',()=>{ wrapSelection(input, open, '{/}'); input.focus(); }); bar.appendChild(b); };
+  mk('B','Gras — entoure la sélection de {b}…{/b}','{b}');
+  mk('I','Italique — {i}…{/b}','{i}');
+  mk('U','Souligné — {u}…{/b}','{u}');
+  mk('S','Barré — {s}…{/b}','{s}');
+  const color=el('input',{type:'color', value:'#C00000', title:'Couleur — {c=RRGGBB}…{/b}'});
+  color.addEventListener('change',()=>{ wrapSelection(input, '{c='+color.value.slice(1).toUpperCase()+'}', '{/}'); input.focus(); });
+  bar.appendChild(color);
+  const sz=el('input',{type:'number', min:'6', max:'72', value:'14', title:'Taille en points — {sz=14}…{/b}', style:'width:52px'});
+  sz.addEventListener('change',()=>{ if(sz.value) wrapSelection(input, '{sz='+sz.value+'}', '{/}'); input.focus(); });
+  bar.appendChild(sz);
+  bar.appendChild(el('span',{class:'note', text:'mise en forme enrichie (appliquée dans le document généré)'}));
+  return bar;
+}
+/* rend une valeur enrichie en HTML réel dans l'aperçu */
+function appendRichText(container, value){
+  for(const seg of parseRichValue(value)){
+    if(!seg.fmt){ container.appendChild(document.createTextNode(seg.text)); continue; }
+    const sp=el('span',{text:seg.text});
+    if(seg.fmt.b) sp.style.fontWeight='bold';
+    if(seg.fmt.i) sp.style.fontStyle='italic';
+    if(seg.fmt.u) sp.style.textDecoration='underline';
+    if(seg.fmt.s) sp.style.textDecoration=(sp.style.textDecoration? sp.style.textDecoration+' line-through':'line-through');
+    if(seg.fmt.color) sp.style.color='#'+seg.fmt.color;
+    if(seg.fmt.size) sp.style.fontSize=seg.fmt.size+'px';
+    container.appendChild(sp);
+  }
+}
 function appendPreviewLine(div, line, values){
   TAG_RE.lastIndex=0; let last=0, m;
   while((m=TAG_RE.exec(line))!==null){
@@ -1138,9 +1296,16 @@ function appendPreviewLine(div, line, values){
     const parsed=parseTagInner(m[1]);
     const v=values? values.get(parsed.base.toLowerCase()) : undefined;
     const filled = v!=null && v!=='';
-    const chip=el('span',{class: filled?'prev-val':'prev-tag', text: filled? v : m[0]});
-    chip.title='['+m[1]+']'+(filled?' = '+v:'');
-    div.appendChild(chip);
+    if(filled){
+      const holder=el('span',{class:'prev-val'});
+      holder.title='['+m[1]+'] = '+v;
+      appendRichText(holder, v);
+      div.appendChild(holder);
+    } else {
+      const chip=el('span',{class:'prev-tag', text:m[0]});
+      chip.title='['+m[1]+']';
+      div.appendChild(chip);
+    }
     last=m.index+m[0].length;
   }
   if(last<line.length) div.appendChild(document.createTextNode(line.slice(last)));
@@ -1177,6 +1342,7 @@ function ouvrirModaleModele(td, modele){
     const inp=el('input',{type:'text', value: modele?(modele.values[tag]||''):''});
     champs[tag]=inp;
     const champ=el('div',{class:'champ'}, el('label',{text:'Balise ['+tag+']'}), inp);
+    champ.appendChild(addFmtToolbar(inp));
     const pl=plageText(tag, td.slices);
     if(pl) champ.appendChild(el('div',{class:'note', text:'Plages : '+pl+' → valeur complète ('+minCharsText(td,tag)+').'}));
     corps.appendChild(champ);
@@ -1238,6 +1404,7 @@ async function ouvrirGeneration(td, modele){
     const inp=el('input',{type:'text', value: modele?(modele.values[tag]||''):''});
     champs[tag]=inp;
     const champ=el('div',{class:'champ'}, el('label',{text:'['+tag+']'}), inp);
+    champ.appendChild(addFmtToolbar(inp));
     const pl=plageText(tag, td.slices);
     if(pl) champ.appendChild(el('div',{class:'note', text:'Plages : '+pl+' → valeur complète ('+minCharsText(td,tag)+').'}));
     form.appendChild(champ);
@@ -1326,11 +1493,11 @@ function voirValeurs(d){
    PARAMETRES (projets + persistance + divers)
    ============================================================ */
 function buildParametres(){
-  const c=$('#page-parametres');
+  const c=$('#page-fichier');
   if(c.dataset.built) return;
   c.dataset.built='1';
   c.innerHTML='';
-  c.appendChild(el('h2',{class:'page-title', text:'Paramètres'}));
+  c.appendChild(el('h2',{class:'page-title', text:'Fichier'}));
 
   const c0=el('div',{class:'carte'});
   c0.appendChild(el('h2',{text:'Projets (niveau hiérarchique du haut)'}));
@@ -1488,8 +1655,9 @@ function updateParamStatus(){
   updateTopStatus();
 }
 function updateTopStatus(){
-  const sp=$('#statusPersist');
-  if(sp) sp.textContent=(state.handles.dossierTrames?'● dossier trames':'○ dossier trames')+' · '+(state.handles.registreExcel?'● registre Excel':'○ registre Excel');
+  const txt=(state.handles.dossierTrames?'● dossier trames':'○ dossier trames')+' · '+(state.handles.registreExcel?'● registre Excel':'○ registre Excel');
+  const ts=$('#topStatus'); if(ts) ts.textContent=txt;
+  const sp=$('#statusPersist'); if(sp) sp.textContent=txt;
 }
 function exporterRegistre(){ return saveBytes(buildRegister(state), 'registre-gestion-documentaire.xlsx', MIMES.xlsx); }
 function exporterDoc(){ return saveBytes(enc(DOC_MD), 'documentation-gestion-documentaire.md', 'text/markdown'); }
@@ -1774,103 +1942,85 @@ const DOC_MD = [
 '',
 '## Hiérarchie : Projet > Types de document / Modèles',
 '',
-'- **Projet** (niveau du haut, sélecteur dans le **bandeau** en haut de l\'écran) : les',
-'  types de document et les modèles **appartiennent au projet actif**. Gérez les projets',
-'  dans Paramètres (créer / activer / supprimer).',
+'- **Projet** (niveau du haut, sélecteur dans le **bandeau**) : les types de document et',
+'  les modèles appartiennent au projet actif. Gestion des projets dans la page **Fichier**.',
 '- **Type de document** (nouveau nom de « trame ») : un **nom**, un **trigramme**',
-'  (3 caractères A-Z/0-9, unique dans le projet, ex. `CTR`) et une **trame** (le fichier',
-'  .docx/.xlsx/.pptx contenant les balises `[..]`).',
-'- **Modèle** : appartient à un type de document du projet ; il a son propre **trigramme**,',
-'  qui **remplace l\'ancien préfixe** : c\'est le trigramme du modèle qui est utilisé dans le',
-'  nom des fichiers générés depuis ce modèle (à défaut, celui du type de document). Tout ou',
-'  partie des balises y sont fixées à une valeur.',
+'  (3 caractères A-Z/0-9, unique dans le projet, ex. `CTR`) et une **trame** (fichier',
+'  .docx/.xlsx/.pptx à balises `[..]`, détectées automatiquement).',
+'- **Modèle** : appartient à un type de document ; a son propre **trigramme** (remplace',
+'  l’ancien préfixe, utilisé dans le nom des fichiers générés depuis ce modèle). Tout ou',
+'  partie des balises y sont fixées.',
+'',
+'## Champs texte enrichis (mise en forme des balises)',
+'',
+'Chaque champ de balise (modèle ou génération) dispose d’une **barre de mise en forme**',
+'(B gras, I italique, U souligné, S barré, couleur, taille en points) qui entoure la',
+'  sélection de marqueurs : `{b}…{/b}`, `{i}…{/b}`, `{u}…{/b}`, `{s}…{/b}`,',
+'  `{c=RRGGBB}…{/b}`, `{sz=pt}…{/b}`. À la génération, ces marqueurs sont convertis en',
+'**vrais runs formatés** dans le document, et l’aperçu les affiche réellement mis en forme.',
+'',
+'Faisabilité par format (testée) :',
+'',
+'- **Word (.docx)** : ✔ — runs `<w:r><w:rPr>…</w:rPr><w:t>…`, même si la balise est',
+'  découpée en plusieurs runs par Word (le run est coupé proprement, le rPr d’origine',
+'  est conservé pour le texte restant).',
+'- **PowerPoint (.pptx)** : ✔ — runs `<a:r><a:rPr b="1" …><a:solidFill>…`.',
+'- **Excel (.xlsx)** : ✔ — rich text en runs `<r><rPr>…</rPr><t>…</t></r>` dans les',
+'  chaînes partagées (sharedStrings) ou inline des cellules.',
 '',
 '## Interface',
 '',
-'- **Bandeau** en haut (style Office, dégradé bleu) : icône, titre, **sélecteur de projet**,',
-'  et onglets de navigation : 🏠 Nouveau document, 📄 Types de document, 📋 Modèles,',
-'  🗂 Documents, 📊 Registre, ⚙ Paramètres.',
-'- **Page principale « Nouveau document »** : **grille de cartes ludiques** des modèles et',
-'  types de document du projet actif, **chacune avec une prévisualisation** du contenu de la',
-'  trame (balises surlignées). Clic sur une carte = fenêtre de génération.',
-'- **Fenêtre de génération** : formulaire des balises **à côté d\'une prévisualisation live**',
-'  (les balises se remplissent au fur et à mesure de la saisie).',
-'- **Bandeau des documents générés** (sous le bandeau principal) : pastilles chrono + titre ;',
-'  clic = page Documents, double-clic = retélécharger.',
-'- **Barre d\'état** en bas : projet actif, compteurs, indicateurs de persistance, prochain chrono.',
+'- **Bandeau** en haut (style Office) : icône, titre + version, **sélecteur de projet**,',
+'  onglets : 🏠 Nouveau document, 📄 Types de document, 📋 Modèles, 🗂 Documents &',
+'  registre, 📁 Fichier (paramètres, projets, persistance, exports manuels).',
+'- **Page principale** : grille de cartes (modèles + types de document) avec',
+'  **prévisualisation** de la trame ; clic = fenêtre de génération avec **prévisualisation',
+'  live** (formulaire à gauche, aperçu à droite).',
+'- **Bandeau des documents générés** sous le bandeau principal.',
+'- **Page Documents & registre** : liste des documents (👁 = valeurs de chaque balise,',
+'  retélécharger) + consultation du registre Excel complet (une table par type de document).',
+'- **Barre d’état** : projet actif, compteurs, persistance, prochain chrono.',
 '',
 '## Nom des fichiers exportés',
 '',
-'`aaaammjj_projet_typededocument_chrono - Titre du document.ext`',
-'',
-'- `aaaammjj` : date de génération (ex. `20260213`) ;',
-'- `projet` : nom du projet (aplani) ;',
-'- `typededocument` : **trigramme** du modèle si génération depuis un modèle, sinon trigramme',
-'  du type de document ;',
-'- `chrono` : **numéro chrono unique** attribué au document (compteur persistant) ;',
-'- `Titre du document` : le titre saisi, qui joue le rôle d\'une balise `[TITRE]` et est écrit',
-'  dans la **propriété « Titre »** du fichier Office.',
-'',
-'## Lire les valeurs des balises d\'un document',
-'',
-'- Dans l\'application : page **Documents** → bouton **👁 Valeurs** de chaque ligne : tableau',
-'  balise → valeur saisie.',
-'- Dans le **registre Excel** : feuilles globales + **une table par type de document**',
-'  (feuille `TD <trigramme>`) listant ses documents avec **une colonne par balise**.',
+'`aaaammjj_projet_typededocument_chrono - Titre du document.ext` (date, nom du projet,',
+'trigramme du modèle ou du type de document, numéro chrono unique, titre — qui remplit',
+'aussi la propriété « Titre » du fichier Office).',
 '',
 '## Balises découpées en plages et balise réservée [CHRONO]',
 '',
-'- `[XX-n]` / `[XX-n-m]` : seule la balise de base `XX` est détectée ; la valeur de `XX` est',
-'  saisie en entier et seules les positions n (ou n à m, en commençant à 1) sont insérées.',
-'  Les plages présentes et le **nombre minimum de caractères** sont affichés (fenêtre Balises,',
-'  infobulles, aide des formulaires) ; avertissement si la valeur est trop courte.',
-'- `[CHRONO]` (réservée, toute casse) : **jamais saisie** — remplie automatiquement avec le',
-'  numéro chrono du document (le même que dans son nom de fichier), y compris découpée',
-'  (`[CHRONO-2]`).',
+'- `[XX-n]` / `[XX-n-m]` : seule la balise de base `XX` est détectée ; la valeur est',
+'  saisie en entier et seules les positions n (ou n à m, 1-based) sont insérées. Plages et',
+'  nombre minimum de caractères affichés ; avertissement si valeur trop courte.',
+'- `[CHRONO]` réservée : jamais saisie — remplie avec le numéro chrono du document.',
 '',
 '## Persistance automatique',
 '',
-'- **Paramètres** : chemins réseau du **dossier des trames** et du **registre Excel**',
-'  (ex. `\\\\serveur\\partage\\trames`) + « Parcourir… » pour associer les emplacements réels',
-'  (API File System Access, Chrome/Edge ; handles conservés en IndexedDB, accès revalidé à',
-'  chaque ouverture).',
-'- Le dossier des trames reçoit une copie du fichier de chaque type de document et est relu',
-'  à l\'ouverture. Le registre `.xlsx` est réenregistré automatiquement à chaque modification.',
-'- Sans configuration : export/import manuels du registre (Paramètres / page Registre).',
+'Page **Fichier** : chemins réseau du **dossier des trames** et du **registre Excel** +',
+'« Parcourir… » (File System Access, Chrome/Edge ; handles en IndexedDB). Le dossier des',
+'trames reçoit chaque fichier de type de document et est relu à l’ouverture ; le registre',
+'.xlsx est réenregistré automatiquement à chaque modification et rechargé à l’ouverture.',
+'Export/import manuels disponibles dans Fichier / page Documents & registre.',
 '',
 '## Registre Excel (feuilles)',
 '',
-'`Paramètres`, `Projets`, `Types de document`, `Modèles`, `Documents`, `Fichiers` (trames en',
-'base64), **plus une feuille `TD <trigramme>` par type de document** (ses documents, une',
+'`Paramètres`, `Projets`, `Types de document`, `Modèles`, `Documents`, `Fichiers` (trames',
+'en base64), **plus une feuille `TD <trigramme>` par type de document** (ses documents, une',
 'colonne par balise avec les valeurs utilisées).',
-'',
-'## Utilisation pas à pas',
-'',
-'1. Créez un **projet** (bouton ＋ du bandeau).',
-'2. Paramètres : chemins réseau + « Parcourir… » pour le dossier des trames et le registre.',
-'3. Page **Types de document** : nom + trigramme + fichier trame → « Créer le type de',
-'   document » (les balises sont détectées automatiquement ; mise à jour rétro-compatible).',
-'4. Page **Modèles** : choisissez un type de document → « Nouveau modèle… » (nom +',
-'   trigramme + valeurs des balises).',
-'5. Page principale : cliquez sur une carte → **prévisualisation + formulaire** → titre,',
-'   balises restantes → « Générer et enregistrer » (nom `aaaammjj_projet_TRI_chrono - Titre.ext`).',
-'6. Page **Documents** / bandeau : retrouvez les documents, lisez les **valeurs par balise**',
-'   (👁), retéléchargez ; le registre (avec table par type de document) est à jour.',
 '',
 '## Détails techniques',
 '',
-'- Fichiers Office = ZIP de XML : lecteur/écrivain ZIP embarqué (sans bibliothèque externe) ;',
-'  lecture/écriture des parties `word/document.xml`, `ppt/slides/slideN.xml`,',
-'  `xl/sharedStrings.xml`, en-têtes/pieds, notes… Balises recherchées dans le texte concaténé',
-'  (gestion des « runs » Word) ; remplacement reporté dans les bons nœuds XML.',
-'- Titre écrit dans `docProps/core.xml` (`dc:title`). Registre `.xlsx` généré/lu en local.',
-'- Aucune requête réseau n\'est émise.',
+'- Fichiers Office = ZIP de XML : lecteur/écrivain ZIP embarqué ; lecture/écriture des',
+'  parties `word/document.xml`, `ppt/slides/slideN.xml`, `xl/sharedStrings.xml`, etc. ;',
+'  balises cherchées dans le texte concaténé (runs Word gérés).',
+'- Aucune requête réseau n’est émise.',
 '',
 '## Prérequis',
 '',
 '- Navigateur moderne ; Chrome/Edge recommandés pour la persistance automatique.',
 ''
 ].join('\n');
+
 
 /* ---------- initialisation ---------- */
 function initUI(){
@@ -1880,7 +2030,7 @@ function initUI(){
   $('#bandeauTous').addEventListener('click',()=>selectPage('documents'));
   $('#selProjet').addEventListener('change', e=>{ state.projetActif=e.target.value||null; renderAll(); });
   $('#btnNouveauProjet').addEventListener('click', nouveauProjet);
-  $('#btnGererProjets').addEventListener('click', ()=>selectPage('parametres'));
+  $('#btnGererProjets').addEventListener('click', ()=>selectPage('fichier'));
   $('#btnChoisirFichier').addEventListener('click', choisirFichierTD);
   $('#tdFichier').addEventListener('change', e=>onFichierTDChange(e.target));
   $('#btnCreerTD').addEventListener('click', creerTD);
@@ -1914,7 +2064,8 @@ globalThis.GD = { state, crc32, zipWrite, zipRead, officeKind, textPartsOf, dete
   detectTagsInZip, applyValuesToPart, setCoreTitle, generateDocument, sanitizeFileName,
   docFileName, fileNameForDoc, slugPart, nextCode, nextChrono, peekChrono, parseTagInner, sliceValue,
   isReservedTag, normalizeTrigramme, validateTrigramme, genTrigramme, ajouterTypeDocument,
-  extractPreviewLines, esc, decXml, u8ToB64, b64ToU8, buildXlsx, parseXlsx,
+  extractPreviewLines, parseRichValue, rPrXmlDocx, rPrXmlPptx, rPrXmlXlsx, runXml,
+  esc, decXml, u8ToB64, b64ToU8, buildXlsx, parseXlsx,
   registreSheets, buildRegister, importRegister, balisesManquantes, MIMES, DOC_MD, APP_VERSION };
 
 if (typeof document !== 'undefined') {
